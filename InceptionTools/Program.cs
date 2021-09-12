@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -25,7 +26,7 @@ namespace InceptionTools
             var INFOCOM = @"G:\btech\INFOCOM.CMP";
             var MECHSHAP = @"G:\btech\MECHSHAP.CMP";
 
-            var FilePath = MAP;
+            var FilePath = BTTLTECH;
 
             var TestArray = File.ReadAllBytes(FilePath);
             var Filename = Path.GetFileNameWithoutExtension(FilePath);
@@ -47,12 +48,12 @@ namespace InceptionTools
             if(Format.Equals(1))
             {
                 Console.WriteLine("Using Decompress_Format01");
-                OutputArray = RLE.Decompress_Format01(TestArray, 3);
+                OutputArray = RLE.Decompress_Format01(TestArray, 4);
             }
             else
             {
                 Console.WriteLine("Using Decompress_Format02");
-                OutputArray = RLE.Decompress_Format02(TestArray, 3);
+                OutputArray = RLE.Decompress_Format02(TestArray, 4);
             }
              
 
@@ -85,6 +86,8 @@ namespace InceptionTools
     {
         public byte[] Decompress_Format01(byte[] CompressedFile, int IndexStart)
         {
+            var CommandList = new List<string>();
+
             int MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining];
 
@@ -95,16 +98,17 @@ namespace InceptionTools
 
             GetByteToDecompress:
 
-            uint ByteValue;
+            int ByteValue;
             bool IsZeroByte = false;
-            byte CurrentCompressedByte = (byte)CompressedFile[CompressedFile_Index];
+            sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];
             
             if (CurrentCompressedByte != 0x00)
             {
-                ByteValue = (uint)CurrentCompressedByte;
+                ByteValue = CurrentCompressedByte;
                 if (CurrentCompressedByte >= 0x00)
                     goto SetRepeatValue;
-                ByteValue = (uint)-CurrentCompressedByte; //if byte negative flip to positive
+
+                ByteValue = -CurrentCompressedByte; //if byte negative flip to positive
             }
             else
             {               
@@ -118,7 +122,7 @@ namespace InceptionTools
 
             SetRepeatValue:
             //Byte value becomes repeat value
-            uint RepeatCountdown = ByteValue;
+            int RunLength = ByteValue;
 
             GetNextByte:
             //Increment to next byte
@@ -126,6 +130,16 @@ namespace InceptionTools
             //Next byte will go to buffer
             byte OutputByte = CompressedFile[CompressedFile_Index];
 
+            //Debug
+            if (!IsZeroByte)
+            {
+                CommandList.Add($"[{RunLength}]{OutputByte}: CurrentCF {CompressedFile_Index}, Decoded {DecodedBuffer_Index}");
+            }
+            else
+            {
+                CommandList.Add($"ZERO: {OutputByte}: CurrentCF {CompressedFile_Index}, Decoded {DecodedBuffer_Index}: [{RunLength}]");
+            }
+            //-------
             do
             {
                 DecodedBuffer[DecodedBuffer_Index] = OutputByte;
@@ -136,16 +150,16 @@ namespace InceptionTools
                     return DecodedBuffer;
 
                 if (IsZeroByte)
-                {
-                    --RepeatCountdown;
-                    if (RepeatCountdown != 0)
+                {                  
+                    --RunLength;
+                    if (RunLength != 0)
                         goto GetNextByte;
 
                     ++CompressedFile_Index;
                     goto GetByteToDecompress;
                 }
-                --RepeatCountdown;
-            } while (RepeatCountdown != 0);
+                --RunLength;
+            } while (RunLength != 0);
             ++CompressedFile_Index;
             goto GetByteToDecompress;
 
@@ -165,7 +179,7 @@ namespace InceptionTools
             GetByteToDecompress:
             uint ByteValue;
             bool IsZeroByte = false;
-            char CurrentCompressedByte = (char)CompresssedFile[CompressedFile_Index];
+            sbyte CurrentCompressedByte = (sbyte)CompresssedFile[CompressedFile_Index];
 
             if (CurrentCompressedByte != 0x00)
             {
