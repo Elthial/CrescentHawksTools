@@ -26,7 +26,7 @@ namespace InceptionTools
             var INFOCOM = @"G:\btech\INFOCOM.CMP";
             var MECHSHAP = @"G:\btech\MECHSHAP.CMP";
 
-            var FilePath = BTTLTECH;
+            var FilePath = TINYLAND;
 
             var TestArray = File.ReadAllBytes(FilePath);
             var Filename = Path.GetFileNameWithoutExtension(FilePath);
@@ -48,17 +48,17 @@ namespace InceptionTools
             if(Format.Equals(1))
             {
                 Console.WriteLine("Using Decompress_Format01");
-                OutputArray = RLE.Decompress_Format01(TestArray, 4);
+                OutputArray = RLE.Decompress_Format01(TestArray, 3);
             }
             else
             {
                 Console.WriteLine("Using Decompress_Format02");
-                OutputArray = RLE.Decompress_Format02(TestArray, 4);
+                OutputArray = RLE.Decompress_Format02(TestArray, 3);
             }
              
 
             var EGA = new EGAEncoder();
-            var imageData = EGA.Write2ModeConverter(TestArray);
+            var imageData = EGA.Write2ModeConverter(OutputArray);
 
 
             int width = 320;
@@ -77,128 +77,196 @@ namespace InceptionTools
                     }
                 }
                 Console.WriteLine("Saving BMP");
-                bmp.Save(@"image.bmp");
+                bmp.Save($"{Filename}.bmp");
             }
         }
     }
 
     class RunLengthEncoding
     {
-        public byte[] Decompress_Format01(byte[] CompressedFile, int IndexStart)
+        public byte[] Decompress_Format01(byte[] CompressedFile, ushort IndexStart)
         {
-            var CommandList = new List<string>();
+            /* DEBUGGER RUN THROUGH OF LIVE FILE:
+             * TINYLAND.CMP
+				-------------------------------
+                Byte: 01 
+                RunLength: 01 (loop till zero)
+                OutputByte: 2A
+                GetByteToDecompress
+				---------------------------------
+                Byte: FE 
+                Negate to 02
+                RunLength: 02 (loop till zero)
+                OutputByte: 22
+				OutputByte: 22
+                GetByteToDecompress
+				---------------------------------
+                Byte: 01
+                RunLength: 01 (loop till zero)
+                OutputByte: A2
+                GetByteToDecompress
+				------------------------------------
+                Byte: FC 
+                Negate to 04
+                RunLength: 04 (loop till zero)
+                OutputByte: 99
+				OutputByte: 99
+				OutputByte: 99
+				OutputByte: 99
+                GetByteToDecompress
+				------------------------------------
+                Byte: 01 
+                RunLength: 01 (loop till zero)
+                OutputByte: 2A
+                GetByteToDecompress
 
-            int MaxBufferRemaining = 0x7D00;
-            byte[] DecodedBuffer = new byte[MaxBufferRemaining];
+                ANIMATE.ICN
+                00  <------- First Byte
+                ZERO Branch
+                RunLength = 80 (Check this)
+                OutputByte = 00
+                GetByteToDecompress
+                04  <------- Second Byte 
+                RunLength = 04 (loop till zero)
+                OutputByte = 09
+                GetByteToDecompress
+                FE  <------- Third Byte 
+                Negate to 02
+                RunLength = 02 (loop till zero)
+                OutputByte = 00
+                GetByteToDecompress
+                22  <------- Forth Byte
+                RunLength = 22 (loop till zero)
+                OutputByte = 58
+                GetByteToDecompress
+                FE  <------- Fifth Byte
+                Negate to 02
+                RunLength = 02  (loop till zero)
+                OutputByte = 00
+                GetByteToDecompress
+                16  <------- Sixth Byte
+                RunLength = 16 (loop till zero)
+                OutputByte = 08
+            */
 
-            int DecodedBuffer_Index = 0;
-            int CompressedFile_Index = IndexStart;
+            short MaxBufferRemaining = 0x7D00;
+            byte[] DecodedBuffer = new byte[MaxBufferRemaining]; //29440
+
+            short DecodedBuffer_Index = 0;
+            ushort CompressedFile_Index = IndexStart;
 
             Console.WriteLine($"CompressedFile Length: {CompressedFile.Length}");
 
             GetByteToDecompress:
 
-            int ByteValue;
+            Console.WriteLine("------------------------------");
+            Console.WriteLine($"Current Index: {CompressedFile_Index} of {CompressedFile.Length}");
+            Console.WriteLine($"Remaining: {CompressedFile.Length - CompressedFile_Index}");
+            Console.WriteLine("------------------------------");
+            ushort ByteValue;
             bool IsZeroByte = false;
-            sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];
+            sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];       
+            Console.WriteLine($"Byte: {CurrentCompressedByte.ToString("X")}");
             
             if (CurrentCompressedByte != 0x00)
             {
-                ByteValue = CurrentCompressedByte;
+                ByteValue = (ushort) CurrentCompressedByte;
                 if (CurrentCompressedByte >= 0x00)
                     goto SetRepeatValue;
 
-                ByteValue = -CurrentCompressedByte; //if byte negative flip to positive
+                ByteValue = (ushort) -CurrentCompressedByte; //if byte negative flip to positive. 
+                Console.WriteLine($"Negate to: {ByteValue.ToString("X")}");
+                //Example: F9 -> 07 as negate: C1, A1 flags
             }
             else
             {               
                 CompressedFile_Index++;
-                //ByteValue = BitConverter.ToUInt16(CompressedFile, CompressedFile_Index);      
-                ByteValue = CompressedFile[CompressedFile_Index];
+                Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                ByteValue = BitConverter.ToUInt16(CompressedFile, CompressedFile_Index);      
+                //ByteValue = CompressedFile[CompressedFile_Index];
                 CompressedFile_Index++;
+                Console.WriteLine($"Current Index: {CompressedFile_Index}");
             }
             //Flag as zero seen
             IsZeroByte = true;
+            Console.WriteLine($"Zero Flag");
 
             SetRepeatValue:
             //Byte value becomes repeat value
-            int RunLength = ByteValue;
+            ushort RunLength = ByteValue; //4
+            Console.WriteLine($"RunLength: {RunLength.ToString("X")}");
 
             GetNextByte:
             //Increment to next byte
             ++CompressedFile_Index;
+            Console.WriteLine($"Current Index: {CompressedFile_Index}");
             //Next byte will go to buffer
-            byte OutputByte = CompressedFile[CompressedFile_Index];
+            byte OutputByte = CompressedFile[CompressedFile_Index];//99           
 
-            //Debug
-            if (!IsZeroByte)
-            {
-                CommandList.Add($"[{RunLength}]{OutputByte}: CurrentCF {CompressedFile_Index}, Decoded {DecodedBuffer_Index}");
-            }
-            else
-            {
-                CommandList.Add($"ZERO: {OutputByte}: CurrentCF {CompressedFile_Index}, Decoded {DecodedBuffer_Index}: [{RunLength}]");
-            }
-            //-------
             do
             {
+                Console.WriteLine($"OutputByte: {OutputByte.ToString("X")}");
                 DecodedBuffer[DecodedBuffer_Index] = OutputByte;
                 ++DecodedBuffer_Index;
-                --MaxBufferRemaining;
+                --MaxBufferRemaining;//--dx
 
                 if (MaxBufferRemaining == 0)
                     return DecodedBuffer;
 
-                if (IsZeroByte)
+                
+                if (!IsZeroByte)
                 {                  
                     --RunLength;
                     if (RunLength != 0)
                         goto GetNextByte;
 
                     ++CompressedFile_Index;
-                    goto GetByteToDecompress;
+                    Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                    Console.WriteLine($"GetByteToDecompress");
+                    goto GetByteToDecompress;                    
                 }
                 --RunLength;
             } while (RunLength != 0);
             ++CompressedFile_Index;
+            Console.WriteLine($"Current Index: {CompressedFile_Index}");
+            Console.WriteLine($"GetByteToDecompress");
             goto GetByteToDecompress;
-
         }
 
-        public byte[] Decompress_Format02(byte[] CompresssedFile, int IndexStart)
+        public byte[] Decompress_Format02(byte[] CompresssedFile, ushort IndexStart)
         {
-            int MaxBufferRemaining = 0x7D00;
+            short MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining];
 
-            int DecodedBuffer_Index = 0;
-            int CompressedFile_Index = IndexStart;
+            short DecodedBuffer_Index = 0;
+            ushort CompressedFile_Index = IndexStart;
 
 
-            int MaxRepeatLengthRemaining = 200;
+            short MaxRunLengthRemaining = 200;
 
             GetByteToDecompress:
-            uint ByteValue;
+            ushort ByteValue;
             bool IsZeroByte = false;
             sbyte CurrentCompressedByte = (sbyte)CompresssedFile[CompressedFile_Index];
 
             if (CurrentCompressedByte != 0x00)
             {
-                ByteValue = (uint)CurrentCompressedByte;
+                ByteValue = (ushort)CurrentCompressedByte;
                 if (CurrentCompressedByte >= 0x00)
                     goto SetRepeatValue;
 
-                ByteValue = (uint) -CurrentCompressedByte;
+                ByteValue = (ushort) -CurrentCompressedByte;
             }
             else
             {
-                int CF_newIndex = CompressedFile_Index + 1;
-                ByteValue = CompresssedFile[CF_newIndex];
-                CompressedFile_Index = CF_newIndex + 1;
+                CompressedFile_Index++;
+                ByteValue = CompresssedFile[CompressedFile_Index];
+                CompressedFile_Index++;
             }
             IsZeroByte = true;
 
             SetRepeatValue:
-            uint RepeatCountdown = ByteValue;
+            ushort RunLength = ByteValue;
 
             GetNextByte:
             ++CompressedFile_Index;
@@ -208,11 +276,11 @@ namespace InceptionTools
             {
                 DecodedBuffer[DecodedBuffer_Index] = OutputByte;
                 ++DecodedBuffer_Index;
-                --MaxRepeatLengthRemaining;
+                --MaxRunLengthRemaining;
 
-                if (MaxRepeatLengthRemaining == 0)
+                if (MaxRunLengthRemaining == 0)
                 {
-                    MaxRepeatLengthRemaining = 200;
+                    MaxRunLengthRemaining = 200;
                     DecodedBuffer_Index -= 31999; //How to this map outside of pointers sub di,7CFFh
                 }
                 --MaxBufferRemaining;
@@ -222,16 +290,16 @@ namespace InceptionTools
 
                 if (IsZeroByte)
                 {
-                    --RepeatCountdown;
-                    if (RepeatCountdown != 0x00)
+                    --RunLength;
+                    if (RunLength != 0x00)
                         goto GetNextByte;
 
                     ++CompressedFile_Index;
                     goto GetByteToDecompress;
                 }
-                --RepeatCountdown;
+                --RunLength;
 
-            } while (RepeatCountdown != 0x00);
+            } while (RunLength != 0x00);
 
             ++CompressedFile_Index;
             goto GetByteToDecompress;
@@ -323,27 +391,6 @@ namespace InceptionTools
                 default:
                     throw new ArgumentOutOfRangeException("Non-EGA colour value detected!");
             }
-        }
-
-        public byte[] GetTestBitmapData()
-        {
-            //Create the empty image.
-            Bitmap image = new Bitmap(320, 200);
-
-            //draw a useless line for some data
-            Graphics imageData = Graphics.FromImage(image);
-            imageData.DrawLine(new Pen(Color.Red), 0, 0, 320, 200);
-
-            //Convert to byte array
-            MemoryStream memoryStream = new MemoryStream();
-            byte[] bitmapData;
-
-            using (memoryStream)
-            {
-                image.Save(memoryStream, ImageFormat.Bmp);
-                bitmapData = memoryStream.ToArray();
-            }
-            return bitmapData;
         }
     }
 }
