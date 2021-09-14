@@ -1,24 +1,32 @@
-﻿using System;
+﻿using log4net.Repository;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace InceptionTools
 {
+
     class Program
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         static void Main(string[] args)
         {
+            LoadLog4Net();
+
             //Format 01 Files
-            var BTTLTECH = @"G:\btech\BTTLTECH.ICN";
-            var ANIMATE = @"G:\btech\ANIMATE.ICN";
-            var STARLEAG = @"G:\btech\STARLEAG.ICN";
-            var DESTRUCT = @"G:\btech\DESTRUCT.ICN";
-            var MAP = @"G:\btech\MAP.ICN";
-            var TINYLAND = @"G:\btech\TINYLAND.CMP";
+            var BTTLTECH = @"G:\btech\BTTLTECH.ICN"; //16 byte
+            var BTBORDER = @"G:\btech\BTBORDER.CMP";  //8 byte
+            var ANIMATE = @"G:\btech\ANIMATE.ICN";   //16 byte
+            var STARLEAG = @"G:\btech\STARLEAG.ICN"; //16 byte
+            var DESTRUCT = @"G:\btech\DESTRUCT.ICN"; //16 byte
+            var MAP = @"G:\btech\MAP.ICN";           //16 byte
+            var TINYLAND = @"G:\btech\TINYLAND.CMP"; //8 byte
 
             //Format 02 Files
             var BTSTATS = @"G:\btech\BTSTATS.CMP";
@@ -26,14 +34,14 @@ namespace InceptionTools
             var INFOCOM = @"G:\btech\INFOCOM.CMP";
             var MECHSHAP = @"G:\btech\MECHSHAP.CMP";
 
-            var FilePath = TINYLAND;
+            var FilePath = MAP;
 
             var TestArray = File.ReadAllBytes(FilePath);
             var Filename = Path.GetFileNameWithoutExtension(FilePath);
             var FileSize = BitConverter.ToInt16(TestArray, 0);
             var Format = TestArray[2];
 
-
+            log.Debug("test");
             Console.WriteLine("Header Info");
             Console.WriteLine("----------------------------");
             Console.WriteLine($"Filename: {Filename}");
@@ -44,8 +52,8 @@ namespace InceptionTools
             byte[] OutputArray;
 
             var RLE = new RunLengthEncoding();
-            
-            if(Format.Equals(1))
+
+            if (Format.Equals(1))
             {
                 Console.WriteLine("Using Decompress_Format01");
                 OutputArray = RLE.Decompress_Format01(TestArray, 3);
@@ -55,100 +63,47 @@ namespace InceptionTools
                 Console.WriteLine("Using Decompress_Format02");
                 OutputArray = RLE.Decompress_Format02(TestArray, 3);
             }
-             
 
-            var EGA = new EGAEncoder();
+
+            var EGA = new EGA();
             var imageData = EGA.Write2ModeConverter(OutputArray);
 
+            var bmp = EGA.DrawToScreen(imageData, 16);
+            Console.WriteLine("Saving BMP");
+            bmp.Save($"{Filename}.bmp");
 
-            int width = 320;
-            int height = 200;
-            using (var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+        }
+
+        static void LoadLog4Net()
+        {
+            try
             {
-                Console.WriteLine($"Creating {width} x {height} BMP Image.");
-                int bytecount = 0;
 
-                for (int y = 0; y <= height - 1; y++)
-                {
-                    for (int x = 0; x <= width - 1; x++)
-                    {
-                        bmp.SetPixel(x, y, EGA.GetEGAColour(imageData[bytecount]));
-                        bytecount++;
-                    }
-                }
-                Console.WriteLine("Saving BMP");
-                bmp.Save($"{Filename}.bmp");
+                ILoggerRepository repository = log4net.LogManager.GetRepository(Assembly.GetCallingAssembly());
+
+                var fileInfo = new FileInfo(@"log4net.config");
+
+                log4net.Config.XmlConfigurator.Configure(repository, fileInfo);
+
+                log.Info("test");
+
+                Console.WriteLine("press any key");
+                Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("Press any key to exit");
+                Console.ReadLine();
             }
         }
+
     }
 
     class RunLengthEncoding
     {
         public byte[] Decompress_Format01(byte[] CompressedFile, ushort IndexStart)
         {
-            /* DEBUGGER RUN THROUGH OF LIVE FILE:
-             * TINYLAND.CMP
-				-------------------------------
-                Byte: 01 
-                RunLength: 01 (loop till zero)
-                OutputByte: 2A
-                GetByteToDecompress
-				---------------------------------
-                Byte: FE 
-                Negate to 02
-                RunLength: 02 (loop till zero)
-                OutputByte: 22
-				OutputByte: 22
-                GetByteToDecompress
-				---------------------------------
-                Byte: 01
-                RunLength: 01 (loop till zero)
-                OutputByte: A2
-                GetByteToDecompress
-				------------------------------------
-                Byte: FC 
-                Negate to 04
-                RunLength: 04 (loop till zero)
-                OutputByte: 99
-				OutputByte: 99
-				OutputByte: 99
-				OutputByte: 99
-                GetByteToDecompress
-				------------------------------------
-                Byte: 01 
-                RunLength: 01 (loop till zero)
-                OutputByte: 2A
-                GetByteToDecompress
-
-                ANIMATE.ICN
-                00  <------- First Byte
-                ZERO Branch
-                RunLength = 80 (Check this)
-                OutputByte = 00
-                GetByteToDecompress
-                04  <------- Second Byte 
-                RunLength = 04 (loop till zero)
-                OutputByte = 09
-                GetByteToDecompress
-                FE  <------- Third Byte 
-                Negate to 02
-                RunLength = 02 (loop till zero)
-                OutputByte = 00
-                GetByteToDecompress
-                22  <------- Forth Byte
-                RunLength = 22 (loop till zero)
-                OutputByte = 58
-                GetByteToDecompress
-                FE  <------- Fifth Byte
-                Negate to 02
-                RunLength = 02  (loop till zero)
-                OutputByte = 00
-                GetByteToDecompress
-                16  <------- Sixth Byte
-                RunLength = 16 (loop till zero)
-                OutputByte = 08
-            */
-
             short MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining]; //29440
 
@@ -165,27 +120,26 @@ namespace InceptionTools
             Console.WriteLine("------------------------------");
             ushort ByteValue;
             bool IsZeroByte = false;
-            sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];       
+            sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];
             Console.WriteLine($"Byte: {CurrentCompressedByte.ToString("X")}");
-            
+
             if (CurrentCompressedByte != 0x00)
             {
-                ByteValue = (ushort) CurrentCompressedByte;
+                ByteValue = (ushort)CurrentCompressedByte;
                 if (CurrentCompressedByte >= 0x00)
                     goto SetRepeatValue;
 
-                ByteValue = (ushort) -CurrentCompressedByte; //if byte negative flip to positive. 
+                ByteValue = (ushort)-CurrentCompressedByte; //if byte negative flip to positive. 
                 Console.WriteLine($"Negate to: {ByteValue.ToString("X")}");
                 //Example: F9 -> 07 as negate: C1, A1 flags
             }
             else
-            {               
+            {
                 CompressedFile_Index++;
-                Console.WriteLine($"Current Index: {CompressedFile_Index}");
-                ByteValue = BitConverter.ToUInt16(CompressedFile, CompressedFile_Index);      
-                //ByteValue = CompressedFile[CompressedFile_Index];
+                //Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                ByteValue = BitConverter.ToUInt16(CompressedFile, CompressedFile_Index);
                 CompressedFile_Index++;
-                Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                //Console.WriteLine($"Current Index: {CompressedFile_Index}");
             }
             //Flag as zero seen
             IsZeroByte = true;
@@ -199,7 +153,7 @@ namespace InceptionTools
             GetNextByte:
             //Increment to next byte
             ++CompressedFile_Index;
-            Console.WriteLine($"Current Index: {CompressedFile_Index}");
+            //Console.WriteLine($"Current Index: {CompressedFile_Index}");
             //Next byte will go to buffer
             byte OutputByte = CompressedFile[CompressedFile_Index];//99           
 
@@ -213,22 +167,22 @@ namespace InceptionTools
                 if (MaxBufferRemaining == 0)
                     return DecodedBuffer;
 
-                
+
                 if (!IsZeroByte)
-                {                  
+                {
                     --RunLength;
                     if (RunLength != 0)
                         goto GetNextByte;
 
                     ++CompressedFile_Index;
-                    Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                    //Console.WriteLine($"Current Index: {CompressedFile_Index}");
                     Console.WriteLine($"GetByteToDecompress");
-                    goto GetByteToDecompress;                    
+                    goto GetByteToDecompress;
                 }
                 --RunLength;
             } while (RunLength != 0);
             ++CompressedFile_Index;
-            Console.WriteLine($"Current Index: {CompressedFile_Index}");
+            //Console.WriteLine($"Current Index: {CompressedFile_Index}");
             Console.WriteLine($"GetByteToDecompress");
             goto GetByteToDecompress;
         }
@@ -255,7 +209,7 @@ namespace InceptionTools
                 if (CurrentCompressedByte >= 0x00)
                     goto SetRepeatValue;
 
-                ByteValue = (ushort) -CurrentCompressedByte;
+                ByteValue = (ushort)-CurrentCompressedByte;
             }
             else
             {
@@ -306,7 +260,7 @@ namespace InceptionTools
         }
     }
 
-    class EGAEncoder
+    class EGA
     {
         public byte[] Write2ModeConverter(Byte[] GraphicsArray)
         {
@@ -338,26 +292,49 @@ namespace InceptionTools
             foreach (byte b in GraphicsArray)
             {
                 byte high = (byte)((b >> 4) & 0xF);
-                byte low = (byte)(b & 0x0F);                
+                byte low = (byte)(b & 0x0F);
                 VGA_Memory[VGA_Offset] = high;
                 ++VGA_Offset;
-                VGA_Memory[VGA_Offset] = low;   
+                VGA_Memory[VGA_Offset] = low;
                 ++VGA_Offset;
                 ByteCount++;
             }
 
             Console.WriteLine($"Screen Resolution is {Width} x {Height}. Expected Pixels {Width * Height}");
             Console.WriteLine($"There are {VGA_Memory.Length - VGA_Offset} missing pixels from the VGA register");
-       
+
             return VGA_Memory;
+        }
+
+        public Bitmap DrawToScreen(byte[] ImageData, int ImageWidth)
+        {
+            //EGA Screens are default 320 x 200 = 64000 pixels
+
+            int ImageHeight = 64000 / ImageWidth;
+            using (var bmp = new Bitmap(ImageWidth, ImageHeight, PixelFormat.Format32bppArgb))
+            {
+                Console.WriteLine($"Creating {ImageWidth} x {ImageHeight} BMP Image.");
+                int bytecount = 0;
+
+                for (int y = 0; y <= ImageHeight - 1; y++)
+                {
+                    for (int x = 0; x <= ImageWidth - 1; x++)
+                    {
+                        bmp.SetPixel(x, y, GetEGAColour(ImageData[bytecount]));
+                        bytecount++;
+                    }
+                }
+
+                return bmp;
+            }
         }
 
         public Color GetEGAColour(int pixel)
         {
-            switch(pixel)
+            switch (pixel)
             {
                 case 0: //Black
-                    return Color.FromArgb(0x00, 0x00, 0x00); 
+                    return Color.FromArgb(0x00, 0x00, 0x00);
                 case 1: //Blue
                     return Color.FromArgb(0x00, 0x00, 0xAA);
                 case 2: //Green
