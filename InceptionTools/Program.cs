@@ -20,7 +20,7 @@ namespace InceptionTools
             LoadLog4Net();
 
             //Format 01 Files
-            var BTTLTECH = @"G:\btech\BTTLTECH.ICN"; //16 byte
+            var BTTLTECH = @"G:\btech\BTTLTECH.ICN"; //16 byte, Output: /Format01/
             var BTBORDER = @"G:\btech\BTBORDER.CMP";  //8 byte
             var ANIMATE = @"G:\btech\ANIMATE.ICN";   //16 byte
             var STARLEAG = @"G:\btech\STARLEAG.ICN"; //16 byte
@@ -34,20 +34,20 @@ namespace InceptionTools
             var INFOCOM = @"G:\btech\INFOCOM.CMP";
             var MECHSHAP = @"G:\btech\MECHSHAP.CMP";
 
-            var FilePath = MAP;
+            var FilePath = BTTLTECH;
 
             var TestArray = File.ReadAllBytes(FilePath);
             var Filename = Path.GetFileNameWithoutExtension(FilePath);
             var FileSize = BitConverter.ToInt16(TestArray, 0);
             var Format = TestArray[2];
 
-            log.Debug("test");
-            Console.WriteLine("Header Info");
-            Console.WriteLine("----------------------------");
-            Console.WriteLine($"Filename: {Filename}");
-            Console.WriteLine($"FileSize (minus two bytes): {FileSize}");
-            Console.WriteLine($"RLE Format: Format0{Format}");
-            Console.WriteLine("----------------------------");
+            log.Info("Crescent Hawks: Inception toolkit");
+            log.Info("Current file Header Info");
+            log.Info("----------------------------");
+            log.Info($"Filename: {Filename}");
+            log.Info($"FileSize (minus two bytes): {FileSize}");
+            log.Info($"RLE Format: Format0{Format}");
+            log.Info("----------------------------");
 
             byte[] OutputArray;
 
@@ -55,12 +55,12 @@ namespace InceptionTools
 
             if (Format.Equals(1))
             {
-                Console.WriteLine("Using Decompress_Format01");
+                log.Info("Using Decompress_Format01");
                 OutputArray = RLE.Decompress_Format01(TestArray, 3);
             }
             else
             {
-                Console.WriteLine("Using Decompress_Format02");
+                log.Info("Using Decompress_Format02");
                 OutputArray = RLE.Decompress_Format02(TestArray, 3);
             }
 
@@ -68,9 +68,7 @@ namespace InceptionTools
             var EGA = new EGA();
             var imageData = EGA.Write2ModeConverter(OutputArray);
 
-            var bmp = EGA.DrawToScreen(imageData, 16);
-            Console.WriteLine("Saving BMP");
-            bmp.Save($"{Filename}.bmp");
+            EGA.DrawToScreen(imageData, 16, Filename);         
 
         }
 
@@ -84,11 +82,6 @@ namespace InceptionTools
                 var fileInfo = new FileInfo(@"log4net.config");
 
                 log4net.Config.XmlConfigurator.Configure(repository, fileInfo);
-
-                log.Info("test");
-
-                Console.WriteLine("press any key");
-                Console.ReadLine();
             }
             catch (Exception ex)
             {
@@ -102,67 +95,69 @@ namespace InceptionTools
 
     class RunLengthEncoding
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public byte[] Decompress_Format01(byte[] CompressedFile, ushort IndexStart)
         {
             short MaxBufferRemaining = 0x7D00;
-            byte[] DecodedBuffer = new byte[MaxBufferRemaining]; //29440
+            byte[] DecodedBuffer = new byte[MaxBufferRemaining]; 
 
             short DecodedBuffer_Index = 0;
             ushort CompressedFile_Index = IndexStart;
 
-            Console.WriteLine($"CompressedFile Length: {CompressedFile.Length}");
+            log.Info($"CompressedFile Length: {CompressedFile.Length}");
+            log.Info($"Max Buffer: {MaxBufferRemaining}");
 
             GetByteToDecompress:
 
-            Console.WriteLine("------------------------------");
-            Console.WriteLine($"Current Index: {CompressedFile_Index} of {CompressedFile.Length}");
-            Console.WriteLine($"Remaining: {CompressedFile.Length - CompressedFile_Index}");
-            Console.WriteLine("------------------------------");
+            log.Debug("------------------------------");
+            log.Debug($"Current Index: {CompressedFile_Index} of {CompressedFile.Length}");
+            log.Debug($"Remaining: {CompressedFile.Length - CompressedFile_Index}");
+            log.Debug("------------------------------");
             ushort ByteValue;
             bool IsZeroByte = false;
             sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];
-            Console.WriteLine($"Byte: {CurrentCompressedByte.ToString("X")}");
+            log.Debug($"Byte: {CurrentCompressedByte.ToString("X")}");
 
             if (CurrentCompressedByte != 0x00)
             {
                 ByteValue = (ushort)CurrentCompressedByte;
                 if (CurrentCompressedByte >= 0x00)
                     goto SetRepeatValue;
-
-                ByteValue = (ushort)-CurrentCompressedByte; //if byte negative flip to positive. 
-                Console.WriteLine($"Negate to: {ByteValue.ToString("X")}");
-                //Example: F9 -> 07 as negate: C1, A1 flags
+                //if byte negative flip to positive. 
+                ByteValue = (ushort)-CurrentCompressedByte; 
+                log.Debug($"Negate to: {ByteValue.ToString("X")}");                
             }
             else
             {
                 CompressedFile_Index++;
-                //Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                log.Debug($"Current Index: {CompressedFile_Index}");
                 ByteValue = BitConverter.ToUInt16(CompressedFile, CompressedFile_Index);
                 CompressedFile_Index++;
-                //Console.WriteLine($"Current Index: {CompressedFile_Index}");
+                log.Debug($"Current Index: {CompressedFile_Index}");
             }
             //Flag as zero seen
             IsZeroByte = true;
-            Console.WriteLine($"Zero Flag");
+            log.Debug($"Zero Flag");
 
             SetRepeatValue:
             //Byte value becomes repeat value
-            ushort RunLength = ByteValue; //4
-            Console.WriteLine($"RunLength: {RunLength.ToString("X")}");
+            ushort RunLength = ByteValue; 
+            log.Debug($"RunLength: {RunLength.ToString("X")}");
 
             GetNextByte:
             //Increment to next byte
             ++CompressedFile_Index;
-            //Console.WriteLine($"Current Index: {CompressedFile_Index}");
+            log.Debug($"Current Index: {CompressedFile_Index}");
             //Next byte will go to buffer
-            byte OutputByte = CompressedFile[CompressedFile_Index];//99           
+            byte OutputByte = CompressedFile[CompressedFile_Index];         
 
             do
             {
-                Console.WriteLine($"OutputByte: {OutputByte.ToString("X")}");
+                log.Debug($"OutputByte: {OutputByte.ToString("X")}");
                 DecodedBuffer[DecodedBuffer_Index] = OutputByte;
                 ++DecodedBuffer_Index;
-                --MaxBufferRemaining;//--dx
+                --MaxBufferRemaining;
 
                 if (MaxBufferRemaining == 0)
                     return DecodedBuffer;
@@ -175,15 +170,15 @@ namespace InceptionTools
                         goto GetNextByte;
 
                     ++CompressedFile_Index;
-                    //Console.WriteLine($"Current Index: {CompressedFile_Index}");
-                    Console.WriteLine($"GetByteToDecompress");
+                    log.Debug($"Current Index: {CompressedFile_Index}");
+                    log.Debug($"GetByteToDecompress");
                     goto GetByteToDecompress;
                 }
                 --RunLength;
             } while (RunLength != 0);
             ++CompressedFile_Index;
-            //Console.WriteLine($"Current Index: {CompressedFile_Index}");
-            Console.WriteLine($"GetByteToDecompress");
+            log.Debug($"Current Index: {CompressedFile_Index}");
+            log.Debug($"GetByteToDecompress");
             goto GetByteToDecompress;
         }
 
@@ -262,6 +257,8 @@ namespace InceptionTools
 
     class EGA
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public byte[] Write2ModeConverter(Byte[] GraphicsArray)
         {
             int Width = 320;
@@ -306,14 +303,14 @@ namespace InceptionTools
             return VGA_Memory;
         }
 
-        public Bitmap DrawToScreen(byte[] ImageData, int ImageWidth)
+        public void DrawToScreen(byte[] ImageData, int ImageWidth, string Filename)
         {
             //EGA Screens are default 320 x 200 = 64000 pixels
 
             int ImageHeight = 64000 / ImageWidth;
             using (var bmp = new Bitmap(ImageWidth, ImageHeight, PixelFormat.Format32bppArgb))
             {
-                Console.WriteLine($"Creating {ImageWidth} x {ImageHeight} BMP Image.");
+                log.Info($"Creating {ImageWidth} x {ImageHeight} BMP Image.");
                 int bytecount = 0;
 
                 for (int y = 0; y <= ImageHeight - 1; y++)
@@ -325,7 +322,8 @@ namespace InceptionTools
                     }
                 }
 
-                return bmp;
+                log.Info($"Saving {Filename}.bmp");
+                bmp.Save($"{Filename}.bmp");
             }
         }
 
