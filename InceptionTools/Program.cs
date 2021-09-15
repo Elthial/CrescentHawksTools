@@ -31,10 +31,10 @@ namespace InceptionTools
             //Format 02 Files
             var BTSTATS = @"G:\btech\BTSTATS.CMP";
             var BTTITLE = @"G:\btech\BTTITLE.CMP";
-            var INFOCOM = @"G:\btech\INFOCOM.CMP";
+            var INFOCOM = @"G:\btech\INFOCOM.CMP"; //320
             var MECHSHAP = @"G:\btech\MECHSHAP.CMP";
 
-            var FilePath = BTTLTECH;
+            var FilePath = MECHSHAP;
 
             var TestArray = File.ReadAllBytes(FilePath);
             var Filename = Path.GetFileNameWithoutExtension(FilePath);
@@ -68,7 +68,7 @@ namespace InceptionTools
             var EGA = new EGA();
             var imageData = EGA.Write2ModeConverter(OutputArray);
 
-            EGA.DrawToScreen(imageData, 16, Filename);         
+            EGA.DrawToScreen(imageData, 320, Filename);         
 
         }
 
@@ -182,7 +182,7 @@ namespace InceptionTools
             goto GetByteToDecompress;
         }
 
-        public byte[] Decompress_Format02(byte[] CompresssedFile, ushort IndexStart)
+        public byte[] Decompress_Format02(byte[] CompressedFile, ushort IndexStart)
         {
             short MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining];
@@ -190,13 +190,21 @@ namespace InceptionTools
             short DecodedBuffer_Index = 0;
             ushort CompressedFile_Index = IndexStart;
 
+            log.Info($"CompressedFile Length: {CompressedFile.Length}");
+            log.Info($"Max Buffer: {MaxBufferRemaining}");
 
             short MaxRunLengthRemaining = 200;
 
             GetByteToDecompress:
+
+            log.Debug("------------------------------");
+            log.Debug($"Current Index: {CompressedFile_Index} of {CompressedFile.Length}");
+            log.Debug($"Remaining: {CompressedFile.Length - CompressedFile_Index}");
+            log.Debug("------------------------------");
             ushort ByteValue;
             bool IsZeroByte = false;
-            sbyte CurrentCompressedByte = (sbyte)CompresssedFile[CompressedFile_Index];
+            sbyte CurrentCompressedByte = (sbyte)CompressedFile[CompressedFile_Index];
+            log.Debug($"Byte: {CurrentCompressedByte.ToString("X")}");
 
             if (CurrentCompressedByte != 0x00)
             {
@@ -205,45 +213,56 @@ namespace InceptionTools
                     goto SetRepeatValue;
 
                 ByteValue = (ushort)-CurrentCompressedByte;
+                log.Debug($"Negate to: {ByteValue.ToString("X")}");
             }
             else
             {
                 CompressedFile_Index++;
-                ByteValue = CompresssedFile[CompressedFile_Index];
+                //log.Debug($"Current Index: {CompressedFile_Index}");
+                ByteValue = BitConverter.ToUInt16(CompressedFile, CompressedFile_Index);
                 CompressedFile_Index++;
+                //log.Debug($"Current Index: {CompressedFile_Index}");
             }
             IsZeroByte = true;
+            log.Debug($"Zero Flag");
 
             SetRepeatValue:
             ushort RunLength = ByteValue;
+            log.Debug($"RunLength: {RunLength.ToString("X")}");
 
             GetNextByte:
             ++CompressedFile_Index;
-            byte OutputByte = CompresssedFile[CompressedFile_Index];
+            //log.Debug($"Current Index: {CompressedFile_Index}");
+            byte OutputByte = CompressedFile[CompressedFile_Index];
 
             do
             {
+                log.Debug($"OutputByte: {OutputByte.ToString("X")}");
                 DecodedBuffer[DecodedBuffer_Index] = OutputByte;
-                ++DecodedBuffer_Index;
+                DecodedBuffer_Index += 160;
                 --MaxRunLengthRemaining;
 
                 if (MaxRunLengthRemaining == 0)
                 {
                     MaxRunLengthRemaining = 200;
+                    log.Debug($"Buffer_Index: {DecodedBuffer_Index}");
                     DecodedBuffer_Index -= 31999; //How to this map outside of pointers sub di,7CFFh
+                    log.Debug($"After RunLength Reset Buffer_Index: {DecodedBuffer_Index}");
                 }
                 --MaxBufferRemaining;
 
                 if (MaxBufferRemaining == 0)
                     return DecodedBuffer;
 
-                if (IsZeroByte)
+                if (!IsZeroByte)
                 {
                     --RunLength;
                     if (RunLength != 0x00)
                         goto GetNextByte;
 
                     ++CompressedFile_Index;
+                    //log.Debug($"Current Index: {CompressedFile_Index}");
+                    log.Debug($"GetByteToDecompress");
                     goto GetByteToDecompress;
                 }
                 --RunLength;
@@ -251,6 +270,8 @@ namespace InceptionTools
             } while (RunLength != 0x00);
 
             ++CompressedFile_Index;
+            //log.Debug($"Current Index: {CompressedFile_Index}");
+            log.Debug($"GetByteToDecompress");
             goto GetByteToDecompress;
         }
     }
