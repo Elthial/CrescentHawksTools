@@ -18,6 +18,10 @@ namespace InceptionTools
             var Assets = new AssetExtractor();
             Assets.ExtractToFileSystem();
             log.Info("Asset Extract Completed");
+
+
+            //var test = new MAP(@"G:\btech\MAP1.MTP");
+            //Console.WriteLine("Review file");
         }
 
         static void LoadLog4Net()
@@ -39,5 +43,13 @@ namespace InceptionTools
             }
         }
 
+    }
+
+    class MapFile
+    {
+        public void ReadMapFile()
+        {
+
+        }
     }
 }

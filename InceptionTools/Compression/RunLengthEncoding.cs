@@ -8,6 +8,9 @@ namespace InceptionTools
 
         public byte[] Decompress_Format01(byte[] CompressedFile, int IndexStart)
         {
+            //If Index Byte is non-Zero then continue with new Byte each increment until end of index count
+            //If Index Byte is Zero then run length until end of index count
+
             short MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining]; 
 
@@ -93,6 +96,13 @@ namespace InceptionTools
 
         public byte[] Decompress_Format02(byte[] CompressedFile, int IndexStart)
         {
+            //If Index Byte is non-Zero then continue with new Byte each increment until end of index count
+            //If Index Byte is Zero then run length until end of index count
+            //Same as format01 but extracts as 160 Byte objects. First byte is extracted per object.
+            //Two objects per x line, 200 y lines then second byte is extracted per object.
+            //This is see in the -31999 and 200 Offsets
+
+
             short MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining];
 
@@ -102,7 +112,11 @@ namespace InceptionTools
             log.Info($"CompressedFile Length: {CompressedFile.Length}");
             log.Info($"Max Buffer: {MaxBufferRemaining}");
 
-            short MaxRunLengthRemaining = 200;
+            const short YAxisSize = 200;
+            const short XAxisObjectNextByteOffset = 31999;
+            short YAxisRemaining = YAxisSize;
+            short XAxisObjectByteSize = 160;
+            
 
             GetByteToDecompress:
 
@@ -148,14 +162,14 @@ namespace InceptionTools
             {
                 log.Debug($"OutputByte: {OutputByte.ToString("X")}");
                 DecodedBuffer[DecodedBuffer_Index] = OutputByte;
-                DecodedBuffer_Index += 160;
-                --MaxRunLengthRemaining;
+                DecodedBuffer_Index += XAxisObjectByteSize;
+                --YAxisRemaining;
 
-                if (MaxRunLengthRemaining == 0)
+                if (YAxisRemaining == 0)
                 {
-                    MaxRunLengthRemaining = 200;
+                    YAxisRemaining = YAxisSize;
                     log.Debug($"Buffer_Index: {DecodedBuffer_Index}");
-                    DecodedBuffer_Index -= 31999; //How to this map outside of pointers sub di,7CFFh
+                    DecodedBuffer_Index -= XAxisObjectNextByteOffset; //Move back to beginning but second byte
                     log.Debug($"After RunLength Reset Buffer_Index: {DecodedBuffer_Index}");
                 }
                 --MaxBufferRemaining;

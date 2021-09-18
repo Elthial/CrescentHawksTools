@@ -3,13 +3,13 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace InceptionTools
+namespace InceptionTools.Graphics
 {
     class EGA
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public byte[] Write2ModeConverter(Byte[] GraphicsArray)
+        public byte[] Write2ModeConverter(byte[] GraphicsArray)
         {
             int Width = 320;
             int Height = 200;
@@ -38,7 +38,7 @@ namespace InceptionTools
 
             foreach (byte b in GraphicsArray)
             {
-                byte high = (byte)((b >> 4) & 0xF);
+                byte high = (byte)(b >> 4 & 0xF);
                 byte low = (byte)(b & 0x0F);
                 VGA_Memory[VGA_Offset] = high;
                 ++VGA_Offset;
@@ -53,11 +53,17 @@ namespace InceptionTools
             return VGA_Memory;
         }
 
-        public void DrawToScreen(byte[] ImageData, int ImageWidth, string Filename)
+        public void DrawToFile(InceptionImageFile f)
         {
+            const int ScreenPixels = 64000;
             //EGA Screens are default 320 x 200 = 64000 pixels
 
-            int ImageHeight = 64000 / ImageWidth;
+            var ImageData = f.DecompressedContents;
+            var ImageWidth = f.Width;
+            var Filename = f.Name;
+            var palette = f.Palette;
+
+            int ImageHeight = ScreenPixels / ImageWidth;
             using (var bmp = new Bitmap(ImageWidth, ImageHeight, PixelFormat.Format32bppArgb))
             {
                 log.Info($"Creating {ImageWidth} x {ImageHeight} BMP Image.");
@@ -67,7 +73,7 @@ namespace InceptionTools
                 {
                     for (int x = 0; x <= ImageWidth - 1; x++)
                     {
-                        bmp.SetPixel(x, y, GetEGADefaultColours(ImageData[bytecount]));
+                        bmp.SetPixel(x, y, palette.GetColour(ImageData[bytecount]));
                         bytecount++;
                     }
                 }
@@ -75,51 +81,6 @@ namespace InceptionTools
                 log.Info(@$"Saving Assets\{Filename}.bmp");
                 Directory.CreateDirectory("Assets");
                 bmp.Save(@$"Assets\{Filename}.bmp");
-            }
-        }
-
-        //Support Palette swapping
-        //Change one colour for another
-        //Infocom needs 5 (AA00AA) swapped for 41 (5500FF)
-        //BTTitle needs 1 (0000AA) swapped for 0 (000000)
-        public Color GetEGADefaultColours(int pixel)
-        {
-            switch (pixel)
-            {
-                case 0: //Black
-                    return Color.FromArgb(0x00, 0x00, 0x00);
-                case 1: //Blue
-                    return Color.FromArgb(0x00, 0x00, 0xAA);
-                case 2: //Green
-                    return Color.FromArgb(0x00, 0xAA, 0x00);
-                case 3: //Cyan
-                    return Color.FromArgb(0x00, 0xAA, 0xAA);
-                case 4: //Red
-                    return Color.FromArgb(0xAA, 0x00, 0x00);
-                case 5: //Magenta
-                    return Color.FromArgb(0xAA, 0x00, 0xAA);
-                case 6: //Yellow / Brown
-                    return Color.FromArgb(0xAA, 0x55, 0x00);
-                case 7: //White / Light Grey
-                    return Color.FromArgb(0xAA, 0xAA, 0xAA);
-                case 8: //Dark Gray / Bright Black
-                    return Color.FromArgb(0x55, 0x55, 0x55);
-                case 9: //Bright Blue
-                    return Color.FromArgb(0x55, 0x55, 0xFF);
-                case 10: //Bright Green
-                    return Color.FromArgb(0x55, 0xFF, 0x55);
-                case 11: //Bright Cyan
-                    return Color.FromArgb(0x55, 0xFF, 0xFF);
-                case 12: //Bright Red
-                    return Color.FromArgb(0xFF, 0x55, 0x55);
-                case 13: //Bright Magenta
-                    return Color.FromArgb(0xFF, 0x55, 0xFF);
-                case 14: //Bright Yellow
-                    return Color.FromArgb(0xFF, 0xFF, 0x55);
-                case 15: //Bright White
-                    return Color.FromArgb(0xFF, 0xFF, 0xFF);
-                default:
-                    throw new ArgumentOutOfRangeException("Non-EGA colour value detected!");
             }
         }
     }
