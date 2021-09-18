@@ -7,6 +7,8 @@ namespace InceptionTools
     public class AssetExtractor
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public Dictionary<string, List<byte[]>> TileSets = new Dictionary<string, List<byte[]>>();
         public void ExtractToFileSystem()
         {
             var EGA_Palette = new Palette();
@@ -66,7 +68,8 @@ namespace InceptionTools
 
                 if (f.Purpose.Equals(ImagePurpose.TileSet))
                 {
-                    EGA.DrawToList(f);
+                    var ts = EGA.DrawToList(f);
+                    TileSets.Add(f.Name, ts);
                 }                
             }         
         }

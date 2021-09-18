@@ -18,11 +18,11 @@ namespace InceptionTools
             Console.WriteLine($"Loading File: {System.IO.Path.GetFileName(FilePath)}");
             Console.WriteLine($"FileSize {Size}");
                
-            Variable1 = ReadContents(1); //3092:5F9C, 0x01
-            Variable2 = ReadContents(1); //3092:5F98, 0x01
-            Variable3 = ReadContents(1); //3092:5F94, 0x01
-            MapSizeX = ReadContents(1); //3092:5F9E, 0x01
-            MapSizeY = ReadContents(1); //3092:5F96, 0x01
+            Variable1 = ReadContents(1).First(); //3092:5F9C, 0x01
+            Variable2 = ReadContents(1).First(); //3092:5F98, 0x01
+            Variable3 = ReadContents(1).First(); //3092:5F94, 0x01
+            MapSizeX = ReadContents(1).First(); //3092:5F9E, 0x01
+            MapSizeY = ReadContents(1).First(); //3092:5F96, 0x01
             Variable6 = ReadContents(0x80);   // 246C: A461, 0x80
             Variable7 = ReadContents(0x100); //246C: A561, 0x100
             Variable8 = ReadContents(0x20);    // 3092:4564, 0x20
@@ -75,11 +75,11 @@ namespace InceptionTools
         private byte[] Contents;
         private int ContentsIndex;
 
-        public byte[] Variable1 { get; }
-        public byte[] Variable2 { get; }
-        public byte[] Variable3 { get; }
-        public byte[] MapSizeX { get; }
-        public byte[] MapSizeY { get; }
+        public byte Variable1 { get; }
+        public byte Variable2 { get; }
+        public byte Variable3 { get; }
+        public int MapSizeX { get; }
+        public int MapSizeY { get; }
         public byte[] Variable6 { get; }
         public byte[] Variable7 { get; }
         public byte[] Variable8 { get; }

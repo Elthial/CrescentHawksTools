@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -53,15 +54,15 @@ namespace InceptionTools.Graphics
             return VGA_Memory;
         }
 
-        public void DrawToList(InceptionImageFile f)
+        public List<byte[]> DrawToList(InceptionImageFile f)
         {
-            log.Info($"Creating Tileset.");        
+            log.Info($"Creating Tileset.");
             //EGA Screens are default 320 x 200 = 64000 pixels
 
-            var ImageData = f.DecompressedContents;          
-            var Filename = f.Name;
-            var palette = f.Palette;
+            var TileSet = new List<byte[]>();
 
+            var ImageData = f.DecompressedContents;          
+      
             var TileHeight = 16;
             var TileWidth = 16;
             var NumOfTiles = 250;
@@ -69,21 +70,24 @@ namespace InceptionTools.Graphics
 
             for (int i = 0; i < NumOfTiles; i++)
             {
-                var bmp = new Bitmap(TileWidth, TileHeight, PixelFormat.Format32bppArgb);                
+                var Tile = new byte[TileHeight * TileWidth];
+                var TileByte = 0;
 
                 for (int y = 0; y < TileHeight; y++)
                 {
                     for (int x = 0; x < TileWidth; x++)
                     {
-                        bmp.SetPixel(x, y, palette.GetColour(ImageData[bytecount]));
+                        Tile[TileByte] = ImageData[bytecount];
+                        TileByte++;
                         bytecount++;
                     }
                 }
 
-                log.Info(@$"Saving Assets\{Filename}\{i}.bmp");
-                Directory.CreateDirectory($@"Assets\{Filename}");
-                bmp.Save(@$"Assets\{Filename}\{i}.bmp");
+                log.Debug($"TileSet: Adding tile[{i}]");
+                TileSet.Add(Tile);
             }
+
+            return TileSet;
         }
 
         public void DrawToFile(InceptionImageFile f)
