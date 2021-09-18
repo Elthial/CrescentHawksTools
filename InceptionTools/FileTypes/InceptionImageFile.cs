@@ -5,13 +5,22 @@ using System.IO;
 
 namespace InceptionTools
 {
+    public enum ImagePurpose
+    {
+        FullScreen = 0,
+        TileSet,
+        TinyTileSet,
+        SpriteSheet
+    }
+
     class InceptionImageFile
     {
-        public InceptionImageFile(string FilePath, Palette FilePalette)
+        public InceptionImageFile(string FilePath, ImagePurpose FilePurpose, Palette FilePalette)
         {            
             Path = FilePath;
             Name = System.IO.Path.GetFileNameWithoutExtension(FilePath);
             Extension = System.IO.Path.GetExtension(FilePath);
+            Purpose = FilePurpose;
             Width = Extension.Equals(".CMP") ? 320 : 16;
             CompressedContents = File.ReadAllBytes(Path);            
             Size = BitConverter.ToInt16(CompressedContents, 0);
@@ -28,6 +37,9 @@ namespace InceptionTools
         public string Name { get; }
         public string Path { get; }
         public string Extension { get; }
+
+        public ImagePurpose Purpose { get; }
+
         public int Width { get; }
         
         public int Size { get; }

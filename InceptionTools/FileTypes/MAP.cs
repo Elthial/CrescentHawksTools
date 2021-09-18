@@ -17,11 +17,7 @@ namespace InceptionTools
 
             Console.WriteLine($"Loading File: {System.IO.Path.GetFileName(FilePath)}");
             Console.WriteLine($"FileSize {Size}");
-                      
-            //StartPos and Length for each array
-            //EndPos is next StartPos
-            //Length in hex
-
+               
             Variable1 = ReadContents(1); //3092:5F9C, 0x01
             Variable2 = ReadContents(1); //3092:5F98, 0x01
             Variable3 = ReadContents(1); //3092:5F94, 0x01
@@ -38,9 +34,9 @@ namespace InceptionTools
             MapData = ReadContents(0x1000); //246C: 101D, 0x1000
 
             int i = 0;
-            for(int y = 0; y < 64; y++)
+            for(int y = 0; y < 64; y++) //MapSizeY?
             {
-                for(int x = 0; x< 64; x++)
+                for(int x = 0; x< 64; x++) //MapSizeX?
                 {
                     Console.Write($"{MapData[i]:x} ");
                     i++;
