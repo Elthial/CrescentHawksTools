@@ -62,6 +62,7 @@ namespace InceptionTools
             var EGA_Palette = new Palette();
             var BTTITLE_Palette = new Palette();
             var INFOCOM_Palette = new Palette();
+            var ENDMECH_Palette = new Palette();
 
             var CHI_Files = new List<InceptionImageFile>()
             {
@@ -75,12 +76,16 @@ namespace InceptionTools
                 new InceptionImageFile(@"G:\btech\BTSTATS.CMP", ImagePurpose.FullScreen, EGA_Palette),
                 new InceptionImageFile(@"G:\btech\BTTITLE.CMP", ImagePurpose.FullScreen, BTTITLE_Palette),
                 new InceptionImageFile(@"G:\btech\INFOCOM.CMP", ImagePurpose.FullScreen, INFOCOM_Palette),
-                new InceptionImageFile(@"G:\btech\MECHSHAP.CMP", ImagePurpose.SpriteSheet, EGA_Palette)
+                new InceptionImageFile(@"G:\btech\MECHSHAP.CMP", ImagePurpose.SpriteSheet, EGA_Palette),
+                new InceptionImageFile(@"G:\btech\ENDMECH.CMP", ImagePurpose.FullScreen, ENDMECH_Palette)
             };
 
             BTTITLE_Palette.SwapColour(1, new PaletteColour("Black / Background", 0x00, 0x00, 0x00));
             INFOCOM_Palette.SwapColour(9, new PaletteColour("Dark Blue / Shadow", 0x00, 0x00, 0xAA));
             INFOCOM_Palette.SwapColour(5, new PaletteColour("Light Blue / Background", 0x55, 0x55, 0xFF));
+            ENDMECH_Palette.SwapColour(1, new PaletteColour("Black / Background", 0x00, 0x00, 0x00));         
+            ENDMECH_Palette.SwapColour(13, new PaletteColour("Light Blue / Jacket / Reflection", 0x55, 0x55, 0xFF));    
+            ENDMECH_Palette.SwapColour(9, new PaletteColour("Dark Blue / Jacket", 0x00, 0x00, 0xAA));
 
             //TODO: Update code with TileSet image which has max number of images in file to remove empty tiles
 
