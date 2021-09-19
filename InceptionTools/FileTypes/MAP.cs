@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -6,17 +7,18 @@ namespace InceptionTools
 {
     class MAP
     {
-        public MAP(string FilePath)
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public MAP(string FilePath, List<byte[]> Tileset)
         {            
-            Path = FilePath;
-            Name = System.IO.Path.GetFileNameWithoutExtension(FilePath);
-            Extension = System.IO.Path.GetExtension(FilePath);
+            FileLocation = FilePath;
+            Name = Path.GetFileNameWithoutExtension(FilePath);
+            Extension = Path.GetExtension(FilePath);
             Size = (int)new FileInfo(FilePath).Length;
-            Contents = File.ReadAllBytes(Path);
+            Contents = File.ReadAllBytes(FileLocation);
             ContentsIndex = 0;
 
-            Console.WriteLine($"Loading File: {System.IO.Path.GetFileName(FilePath)}");
-            Console.WriteLine($"FileSize {Size}");
+            log.Debug($"Loading File: {Path.GetFileName(FilePath)}");
+            log.Debug($"FileSize {Size}");
                
             Variable1 = ReadContents(1).First(); //3092:5F9C, 0x01
             Variable2 = ReadContents(1).First(); //3092:5F98, 0x01
@@ -31,22 +33,14 @@ namespace InceptionTools
             Variable11 = ReadContents(0x20);   //3092:39D4, 0x20
             Variable12 = ReadContents(0x10);   //0x3092:4602, 0x10
             Variable13 = ReadContents(0x08);   //3092:3768, 0x08
-            MapData = ReadContents(0x1000); //246C: 101D, 0x1000
+            RAWMap = ReadContents(0x1000); //246C: 101D, 0x1000
 
-            int i = 0;
-            for(int y = 0; y < 64; y++) //MapSizeY?
-            {
-                for(int x = 0; x< 64; x++) //MapSizeX?
-                {
-                    Console.Write($"{MapData[i]:x} ");
-                    i++;
-                }
-                Console.WriteLine("");
-            }
+            //Keep RawMap arround until we've fully deciphered the MAP format in case we need it for ref
+            MapData = Remap(RAWMap);
 
-            var distinct = MapData.Distinct().OrderByDescending(num => num).ToList();
+            MapTileset = Tileset;
 
-            Console.WriteLine("FileLoad Successful");
+            log.Debug("Map Load Successful");
 
             if (!Extension.Equals(".MTP"))
             {
@@ -54,27 +48,18 @@ namespace InceptionTools
             }
         }
 
-        private byte[] ReadContents(int BytesToRead)
-        {
-            var Output = new byte[BytesToRead];
-
-            for(int i = 0; i < BytesToRead; i++)
-            {
-                Output[i] = Contents[ContentsIndex];
-                ContentsIndex++;
-            }
-
-            return Output;
-        }
+        
 
         public string Name { get; }
-        public string Path { get; }
+        public string FileLocation { get; }
         public string Extension { get; }
 
         public int Size { get; }
         private byte[] Contents;
         private int ContentsIndex;
-
+        
+        public List<byte[]> MapTileset { get; }
+       
         public byte Variable1 { get; }
         public byte Variable2 { get; }
         public byte Variable3 { get; }
@@ -88,6 +73,66 @@ namespace InceptionTools
         public byte[] Variable11 { get; }
         public byte[] Variable12 { get; }
         public byte[] Variable13 { get; }
-        public byte[] MapData { get; }     
+        public byte[] RAWMap { get; }
+        public byte[] MapData { get; }
+
+        private byte[] ReadContents(int BytesToRead)
+        {
+            var Output = new byte[BytesToRead];
+
+
+            for (int i = 0; i < BytesToRead; i++)
+            {
+                Output[i] = (ContentsIndex < Size) ? Contents[ContentsIndex] : (byte)0x00;  
+                ContentsIndex++;
+            }
+
+            return Output;
+        }
+
+        private byte[] Remap(byte[] RAWmap)
+        {
+            //-------------------------------------------
+            // Remap map
+            //--------------------------------------------
+            // 64 byte object per line
+            // 8 x 8 | 8 x 8 | 8 x 8 |
+            // Remap into standard linear X * Y map
+
+            log.Debug($"Remapping {Name}");
+            log.Debug($"{MapSizeX} * {MapSizeY}");
+            log.Debug($"Total size: {RAWmap.Length}");
+
+            var remapped = new byte[RAWmap.Length];
+
+            var MapIndex = 0;
+            var BlockSizeX = 8;
+            var BlockSizeY = 8;
+            var MapBlocksX = MapSizeX / BlockSizeX;
+            var MapBlocksY = MapSizeY / BlockSizeY;
+
+            for (int BlockY = 0; BlockY < MapBlocksY; BlockY++)
+            {
+                for (int BlockX = 0; BlockX < MapBlocksX; BlockX++)
+                {
+                    for (int TileY = 0; TileY < BlockSizeY; TileY++)
+                    {
+                        for (int TileX = 0; TileX < BlockSizeX; TileX++)
+                        {
+                            var TilePerRow = BlockSizeX * MapBlocksX;
+                            var OffSetX = (BlockX * BlockSizeX);
+                            var OffsetY = ((BlockY * BlockSizeY) + TileY) * TilePerRow;
+                            var TotalOffset = OffsetY + OffSetX + TileX;
+
+                            remapped[MapIndex] = RAWmap[TotalOffset];
+                            MapIndex++;
+                        }
+                    }
+                }
+            }
+
+            log.Debug($"Completed Remapping {Name}");
+            return remapped;
+        }
     }
 }

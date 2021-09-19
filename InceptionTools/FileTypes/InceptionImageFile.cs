@@ -17,12 +17,12 @@ namespace InceptionTools
     {
         public InceptionImageFile(string FilePath, ImagePurpose FilePurpose, Palette FilePalette)
         {            
-            Path = FilePath;
-            Name = System.IO.Path.GetFileNameWithoutExtension(FilePath);
-            Extension = System.IO.Path.GetExtension(FilePath);
+            FileLocation = FilePath;
+            Name = Path.GetFileNameWithoutExtension(FilePath);
+            Extension = Path.GetExtension(FilePath);
             Purpose = FilePurpose;
             Width = Extension.Equals(".CMP") ? 320 : 16;
-            CompressedContents = File.ReadAllBytes(Path);            
+            CompressedContents = File.ReadAllBytes(FileLocation);            
             Size = BitConverter.ToInt16(CompressedContents, 0);
             CompressionFormat = CompressedContents[2];
             StartPos = 3;
@@ -35,7 +35,7 @@ namespace InceptionTools
         }
 
         public string Name { get; }
-        public string Path { get; }
+        public string FileLocation { get; }
         public string Extension { get; }
 
         public ImagePurpose Purpose { get; }

@@ -54,7 +54,7 @@ namespace InceptionTools.Graphics
             return VGA_Memory;
         }
 
-        public List<byte[]> DrawToList(InceptionImageFile f)
+        public List<byte[]> DrawToTileSet(InceptionImageFile f)
         {
             log.Info($"Creating Tileset.");
             //EGA Screens are default 320 x 200 = 64000 pixels
@@ -65,12 +65,13 @@ namespace InceptionTools.Graphics
       
             var TileHeight = 16;
             var TileWidth = 16;
-            var NumOfTiles = 250;
+            var BytesPerTile = TileWidth * TileHeight;
+            var NumOfTiles = f.DecompressedContents.Length / BytesPerTile;
             int bytecount = 0;
 
             for (int i = 0; i < NumOfTiles; i++)
             {
-                var Tile = new byte[TileHeight * TileWidth];
+                var Tile = new byte[BytesPerTile];
                 var TileByte = 0;
 
                 for (int y = 0; y < TileHeight; y++)
@@ -118,6 +119,63 @@ namespace InceptionTools.Graphics
                 log.Info(@$"Saving Assets\{Filename}.bmp");
                 Directory.CreateDirectory("Assets");
                 bmp.Save(@$"Assets\{Filename}.bmp");
+            }
+        }
+
+        public void DrawMapToFile(MAP map)
+        {
+            //-------------------------------------------
+            // Drawing map for debugging purposes
+            //--------------------------------------------
+
+            var TileSizeX = 16;
+            var TileSizeY = 16;
+            var PixelX = map.MapSizeX * TileSizeX;
+            var PixelY = map.MapSizeY * TileSizeY;
+
+            log.Info($"Creating {PixelX} x {PixelY} BMP Image.");
+
+            var mapData = map.MapData;
+           
+            using (var bmp = new Bitmap(PixelX, PixelY, PixelFormat.Format32bppArgb))
+            {
+                var bytecounter = 0;
+
+                for (int TileY = 0; TileY < map.MapSizeY; TileY++)
+                {
+                    for (int TileX = 0; TileX < map.MapSizeX; TileX++)
+                    {
+                        DrawTile(bmp, mapData[bytecounter], TileX, TileY, map.MapTileset);
+                        bytecounter++;
+                    }
+                }
+
+                log.Info(@$"Saving Assets\Maps\{map.Name}.bmp");
+                Directory.CreateDirectory(@"Assets\Maps");
+                bmp.Save(@$"Assets\Maps\{map.Name}.bmp");
+            }
+        }
+
+
+        private void DrawTile(Bitmap bmp, byte TileType, int TileX, int TileY, List<byte[]> TileSet)
+        {
+            var bytecount = 0;
+            var TileSizeX = 16;
+            var TileSizeY = 16;
+            var Tile = TileSet[TileType];
+            var Palette = new Palette();
+
+            for (int PixelY = 0; PixelY < TileSizeY; PixelY++)
+            {
+                for (int PixelX = 0; PixelX < TileSizeX; PixelX++)
+                {
+                    var OffsetX = (TileX * TileSizeX) + PixelX;
+                    var OffsetY = (TileY * TileSizeY) + PixelY;
+                    int ColourIndex = Tile[bytecount];
+
+                    bmp.SetPixel(OffsetX, OffsetY, Palette.GetColour(ColourIndex));
+                    bytecount++;
+                }
             }
         }
     }

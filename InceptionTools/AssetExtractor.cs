@@ -8,8 +8,56 @@ namespace InceptionTools
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public Dictionary<string, List<byte[]>> TileSets = new Dictionary<string, List<byte[]>>();
+        private EGA EGA;
+        private Dictionary<string, List<byte[]>> TileSets = new Dictionary<string, List<byte[]>>();
         public void ExtractToFileSystem()
+        {
+            EGA = new EGA();
+
+            ExtractImageFiles();
+            ExtractMapFiles();
+
+        }
+
+        private void ExtractMapFiles()
+        {           
+            var CHI_Files = new List<MAP>()
+            {
+                new MAP(@"G:\btech\MAP1.MTP", TileSets["BTTLTECH"]), //Citadel, Working.
+                new MAP(@"G:\btech\MAP2.MTP", TileSets["BTTLTECH"]), //Starport, Working.
+                new MAP(@"G:\btech\MAP3.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP4.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP5.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP6.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP7.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP8.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP9.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP10.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
+                new MAP(@"G:\btech\MAP11.MTP", TileSets["DESTRUCT"]), //Destroyed Citadel, Need Destruct tileset
+                new MAP(@"G:\btech\MAP12.MTP", TileSets["BTTLTECH"]), //Inventors hut, Working.
+                new MAP(@"G:\btech\MAP13.MTP", TileSets["BTTLTECH"]), //Cache exterior, Working
+                new MAP(@"G:\btech\MAP14.MTP", TileSets["STARLEAG"])  //StarLeague Cache. Needs StarLeague TileSet
+                //new MAP(@"G:\btech\MAP15.MTP"), //Buffer error. Star Map?
+            };
+
+            //World map is also missing
+            //Maps need to specify which tileset they use
+
+            foreach (var f in CHI_Files)
+            {
+                log.Info("Crescent Hawks: Inception toolkit");
+                log.Info("Current file Header Info");
+                log.Info("----------------------------");
+                log.Info($"Filename: {f.Name}");
+                log.Info($"FileSize (minus two bytes): {f.Size}");
+                log.Info($"Map Size: {f.MapData.Length}");
+                log.Info("----------------------------");
+
+                EGA.DrawMapToFile(f);    
+            }
+        }
+
+        private void ExtractImageFiles()
         {
             var EGA_Palette = new Palette();
             var BTTITLE_Palette = new Palette();
@@ -25,7 +73,7 @@ namespace InceptionTools
                 new InceptionImageFile(@"G:\btech\MAP.ICN", ImagePurpose.TileSet, EGA_Palette),
                 new InceptionImageFile(@"G:\btech\TINYLAND.CMP", ImagePurpose.TinyTileSet, EGA_Palette),
                 new InceptionImageFile(@"G:\btech\BTSTATS.CMP", ImagePurpose.FullScreen, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\BTTITLE.CMP", ImagePurpose.FullScreen, BTTITLE_Palette), 
+                new InceptionImageFile(@"G:\btech\BTTITLE.CMP", ImagePurpose.FullScreen, BTTITLE_Palette),
                 new InceptionImageFile(@"G:\btech\INFOCOM.CMP", ImagePurpose.FullScreen, INFOCOM_Palette),
                 new InceptionImageFile(@"G:\btech\MECHSHAP.CMP", ImagePurpose.SpriteSheet, EGA_Palette)
             };
@@ -61,17 +109,17 @@ namespace InceptionTools
                     OutputArray = RLE.Decompress_Format02(f.CompressedContents, f.StartPos);
                 }
 
-                var EGA = new EGA();
+               
                 f.DecompressedContents = EGA.Write2ModeConverter(OutputArray);
-                              
+
                 EGA.DrawToFile(f);
 
                 if (f.Purpose.Equals(ImagePurpose.TileSet))
                 {
-                    var ts = EGA.DrawToList(f);
+                    var ts = EGA.DrawToTileSet(f);
                     TileSets.Add(f.Name, ts);
-                }                
-            }         
+                }
+            }
         }
     }
 }
