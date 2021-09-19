@@ -1,19 +1,13 @@
-﻿using InceptionTools.Graphics;
-using log4net.Repository;
+﻿using log4net.Repository;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 
 namespace InceptionTools
 {
-
-    class Program
+    class ToolKit
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         static void Main(string[] args)
         {
             LoadLog4Net();
@@ -22,21 +16,12 @@ namespace InceptionTools
             var Assets = new AssetExtractor();
             Assets.ExtractToFileSystem();
             log.Info("Asset Extract Completed");
-
-           
-
         }
-
-     
-        
-
-        
 
         static void LoadLog4Net()
         {
             try
             {
-
                 ILoggerRepository repository = log4net.LogManager.GetRepository(Assembly.GetCallingAssembly());
 
                 var fileInfo = new FileInfo(@"log4net.config");
@@ -50,6 +35,5 @@ namespace InceptionTools
                 Console.ReadLine();
             }
         }
-
     }
 }

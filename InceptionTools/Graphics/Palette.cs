@@ -36,18 +36,15 @@ namespace InceptionTools.Graphics
                 new PaletteColour("Bright White", 0xFF, 0xFF, 0xFF)
             };
         }
-
         public Color GetColour(int PixelValue)
         {
             return palette[PixelValue].Colour;
         }
-
         public void SwapColour(int Index, PaletteColour SwapColor)
         {
             CustomPalette = true;
             palette[Index] = SwapColor;
         }
-
         public void ResetToDefaultPalette()
         {
             palette = EGADefault();

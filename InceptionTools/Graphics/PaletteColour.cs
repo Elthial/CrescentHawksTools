@@ -9,9 +9,7 @@ namespace InceptionTools.Graphics
             name = Name;
             Colour = Color.FromArgb(Red, Green, Blue);
         }
-
         readonly string name;
         public readonly Color Colour;
-
     }
 }

@@ -1,21 +1,12 @@
 ﻿using InceptionTools.Graphics;
 using System;
-using System.Drawing;
 using System.IO;
 
 namespace InceptionTools
 {
-    public enum ImagePurpose
+    class InceptionImageFile : AssetFile
     {
-        FullScreen = 0,
-        TileSet,
-        TinyTileSet,
-        SpriteSheet
-    }
-
-    class InceptionImageFile
-    {
-        public InceptionImageFile(string FilePath, ImagePurpose FilePurpose, Palette FilePalette)
+        public InceptionImageFile(string FilePath, ImagePurpose FilePurpose, Palette FilePalette) 
         {            
             FileLocation = FilePath;
             Name = Path.GetFileNameWithoutExtension(FilePath);
@@ -34,19 +25,15 @@ namespace InceptionTools
             }
         }
 
-        public string Name { get; }
-        public string FileLocation { get; }
-        public string Extension { get; }
-
+        public override string Name { get; }
+        public override string FileLocation { get; }
+        public override string Extension { get; }
         public ImagePurpose Purpose { get; }
-
-        public int Width { get; }
-        
-        public int Size { get; }
+        public int Width { get; }        
+        public override int Size { get; }
         public int StartPos { get; }
         public int CompressionFormat { get; }
         public byte[] CompressedContents { get; }
-
         public byte[] DecompressedContents { get; set; }
         public Palette Palette { get; }     
     }

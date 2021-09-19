@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace InceptionTools
 {
-
     public class AssetExtractor
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -16,32 +15,33 @@ namespace InceptionTools
 
             ExtractImageFiles();
             ExtractMapFiles();
-
         }
 
         private void ExtractMapFiles()
         {           
-            var CHI_Files = new List<MAP>()
+            var CHI_Files = new List<MapFile>()
             {
-                new MAP(@"G:\btech\MAP1.MTP", TileSets["BTTLTECH"]), //Citadel, Working.
-                new MAP(@"G:\btech\MAP2.MTP", TileSets["BTTLTECH"]), //Starport, Working.
-                new MAP(@"G:\btech\MAP3.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP4.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP5.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP6.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP7.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP8.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP9.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP10.MTP", TileSets["BTTLTECH"]), //Village, broken. Different remap algorithm?
-                new MAP(@"G:\btech\MAP11.MTP", TileSets["DESTRUCT"]), //Destroyed Citadel, Need Destruct tileset
-                new MAP(@"G:\btech\MAP12.MTP", TileSets["BTTLTECH"]), //Inventors hut, Working.
-                new MAP(@"G:\btech\MAP13.MTP", TileSets["BTTLTECH"]), //Cache exterior, Working
-                new MAP(@"G:\btech\MAP14.MTP", TileSets["STARLEAG"])  //StarLeague Cache. Needs StarLeague TileSet
-                //new MAP(@"G:\btech\MAP15.MTP"), //Buffer error. Star Map?
+                new MAP(@"G:\btech\MAP1.MTP", MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Citadel
+                new MAP(@"G:\btech\MAP2.MTP", MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Starport
+                new MAP(@"G:\btech\MAP3.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Prison
+                new MAP(@"G:\btech\MAP4.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP5.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP6.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP7.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP8.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP9.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP10.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(@"G:\btech\MAP11.MTP",  MapFormat.BlockFormat, TileSets["DESTRUCT"]), //Destroyed Citadel
+                new MAP(@"G:\btech\MAP12.MTP",  MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Inventors hut
+                new MAP(@"G:\btech\MAP13.MTP",  MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Cache exterior
+                new MAP(@"G:\btech\MAP14.MTP",  MapFormat.BlockFormat, TileSets["STARLEAG"]),  //StarLeague Cache
+                new STARMAP(@"G:\btech\MAP15.MTP", MapFormat.LinearFormat, TileSets["MAP"]) //Star Map
             };
 
-            //World map is also missing
-            //Maps need to specify which tileset they use
+            //World map is missing
+            //No Remaining files, map likely 1024 x 1024 tiles = 1 MB 
+            //No file sized to contain it, massively compressed or procedurally generated?
+       
 
             foreach (var f in CHI_Files)
             {
@@ -108,11 +108,10 @@ namespace InceptionTools
                     log.Info("Using Decompress_Format02");
                     OutputArray = RLE.Decompress_Format02(f.CompressedContents, f.StartPos);
                 }
-
                
                 f.DecompressedContents = EGA.Write2ModeConverter(OutputArray);
 
-                EGA.DrawToFile(f);
+                EGA.DrawImageToFile(f);
 
                 if (f.Purpose.Equals(ImagePurpose.TileSet))
                 {

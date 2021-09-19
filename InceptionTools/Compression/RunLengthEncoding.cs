@@ -102,7 +102,6 @@ namespace InceptionTools
             //Two objects per x line, 200 y lines then second byte is extracted per object.
             //This is see in the -31999 and 200 Offsets
 
-
             short MaxBufferRemaining = 0x7D00;
             byte[] DecodedBuffer = new byte[MaxBufferRemaining];
 

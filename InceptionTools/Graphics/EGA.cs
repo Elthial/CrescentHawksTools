@@ -91,7 +91,7 @@ namespace InceptionTools.Graphics
             return TileSet;
         }
 
-        public void DrawToFile(InceptionImageFile f)
+        public void DrawImageToFile(InceptionImageFile f)
         {
             const int ScreenPixels = 64000;
             //EGA Screens are default 320 x 200 = 64000 pixels
@@ -121,8 +121,7 @@ namespace InceptionTools.Graphics
                 bmp.Save(@$"Assets\{Filename}.bmp");
             }
         }
-
-        public void DrawMapToFile(MAP map)
+        public void DrawMapToFile(MapFile map)
         {
             //-------------------------------------------
             // Drawing map for debugging purposes
@@ -155,8 +154,6 @@ namespace InceptionTools.Graphics
                 bmp.Save(@$"Assets\Maps\{map.Name}.bmp");
             }
         }
-
-
         private void DrawTile(Bitmap bmp, byte TileType, int TileX, int TileY, List<byte[]> TileSet)
         {
             var bytecount = 0;
