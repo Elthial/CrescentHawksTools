@@ -13,8 +13,12 @@ namespace InceptionTools
             LoadLog4Net();
             log.Info("Log4Net Loaded");
 
+            Console.WriteLine("Please enter path to btech folder");
+            Console.WriteLine(@"Example: D:\btech\");
+            string sourceFolder = Console.ReadLine();
+
             var Assets = new AssetExtractor();
-            Assets.ExtractToFileSystem();
+            Assets.ExtractToFileSystem(sourceFolder);
             log.Info("Asset Extract Completed");
         }
 

@@ -1,5 +1,6 @@
 ﻿using InceptionTools.Graphics;
 using System.Collections.Generic;
+using System.IO;
 
 namespace InceptionTools
 {
@@ -7,11 +8,13 @@ namespace InceptionTools
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private string _SourceFolder;
         private EGA EGA;
         private Dictionary<string, List<byte[]>> TileSets = new Dictionary<string, List<byte[]>>();
-        public void ExtractToFileSystem()
+        public void ExtractToFileSystem(string SourceFolder)
         {
             EGA = new EGA();
+            _SourceFolder = SourceFolder;
 
             ExtractImageFiles();
             ExtractMapFiles();
@@ -21,21 +24,21 @@ namespace InceptionTools
         {           
             var CHI_Files = new List<MapFile>()
             {
-                new MAP(@"G:\btech\MAP1.MTP", MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Citadel
-                new MAP(@"G:\btech\MAP2.MTP", MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Starport
-                new MAP(@"G:\btech\MAP3.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Prison
-                new MAP(@"G:\btech\MAP4.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP5.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP6.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP7.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP8.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP9.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP10.MTP", MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
-                new MAP(@"G:\btech\MAP11.MTP",  MapFormat.BlockFormat, TileSets["DESTRUCT"]), //Destroyed Citadel
-                new MAP(@"G:\btech\MAP12.MTP",  MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Inventors hut
-                new MAP(@"G:\btech\MAP13.MTP",  MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Cache exterior
-                new MAP(@"G:\btech\MAP14.MTP",  MapFormat.BlockFormat, TileSets["STARLEAG"]),  //StarLeague Cache
-                new STARMAP(@"G:\btech\MAP15.MTP", MapFormat.LinearFormat, TileSets["MAP"]) //Star Map
+                new MAP(Path.Combine(_SourceFolder, "MAP1.MTP"), MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Citadel
+                new MAP(Path.Combine(_SourceFolder, "MAP2.MTP"), MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Starport
+                new MAP(Path.Combine(_SourceFolder, "MAP3.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Prison
+                new MAP(Path.Combine(_SourceFolder, "MAP4.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP5.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP6.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP7.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP8.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP9.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP10.MTP"), MapFormat.LinearFormat, TileSets["BTTLTECH"]), //Village
+                new MAP(Path.Combine(_SourceFolder, "MAP11.MTP"),  MapFormat.BlockFormat, TileSets["DESTRUCT"]), //Destroyed Citadel
+                new MAP(Path.Combine(_SourceFolder, "MAP12.MTP"),  MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Inventors hut
+                new MAP(Path.Combine(_SourceFolder, "MAP13.MTP"),  MapFormat.BlockFormat, TileSets["BTTLTECH"]), //Cache exterior
+                new MAP(Path.Combine(_SourceFolder, "MAP14.MTP"),  MapFormat.BlockFormat, TileSets["STARLEAG"]),  //StarLeague Cache
+                new STARMAP(Path.Combine(_SourceFolder, "MAP15.MTP"), MapFormat.LinearFormat, TileSets["MAP"]) //Star Map
             };
 
             //World map is missing
@@ -66,18 +69,18 @@ namespace InceptionTools
 
             var CHI_Files = new List<InceptionImageFile>()
             {
-                new InceptionImageFile(@"G:\btech\BTTLTECH.ICN", ImagePurpose.TileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\BTBORDER.CMP", ImagePurpose.TinyTileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\ANIMATE.ICN", ImagePurpose.TileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\STARLEAG.ICN", ImagePurpose.TileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\DESTRUCT.ICN", ImagePurpose.TileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\MAP.ICN", ImagePurpose.TileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\TINYLAND.CMP", ImagePurpose.TinyTileSet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\BTSTATS.CMP", ImagePurpose.FullScreen, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\BTTITLE.CMP", ImagePurpose.FullScreen, BTTITLE_Palette),
-                new InceptionImageFile(@"G:\btech\INFOCOM.CMP", ImagePurpose.FullScreen, INFOCOM_Palette),
-                new InceptionImageFile(@"G:\btech\MECHSHAP.CMP", ImagePurpose.SpriteSheet, EGA_Palette),
-                new InceptionImageFile(@"G:\btech\ENDMECH.CMP", ImagePurpose.FullScreen, ENDMECH_Palette)
+                new InceptionImageFile(Path.Combine(_SourceFolder, "BTTLTECH.ICN"), ImagePurpose.TileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "BTBORDER.CMP"), ImagePurpose.TinyTileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "ANIMATE.ICN"), ImagePurpose.TileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "STARLEAG.ICN"), ImagePurpose.TileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "DESTRUCT.ICN"), ImagePurpose.TileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "MAP.ICN"), ImagePurpose.TileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "TINYLAND.CMP"), ImagePurpose.TinyTileSet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "BTSTATS.CMP"), ImagePurpose.FullScreen, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "BTTITLE.CMP"), ImagePurpose.FullScreen, BTTITLE_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "INFOCOM.CMP"), ImagePurpose.FullScreen, INFOCOM_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "MECHSHAP.CMP"), ImagePurpose.SpriteSheet, EGA_Palette),
+                new InceptionImageFile(Path.Combine(_SourceFolder, "ENDMECH.CMP"), ImagePurpose.FullScreen, ENDMECH_Palette)
             };
 
             BTTITLE_Palette.SwapColour(1, new PaletteColour("Black / Background", 0x00, 0x00, 0x00));
