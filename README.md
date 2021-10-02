@@ -1,6 +1,6 @@
 # CrescentHawksTools
 
-This is a .NET CORE toolkit for extracting the assets from the `Crescent Hawks: Inception` game.
+This is a .NET CORE toolkit for extracting the assets from the `Crescent Hawks: Inception` game.  
 Support for `Crescent Hawks: Revenge` will come later.
 
 ![Citadel Map](Documentation/Images/MAP1.png)
