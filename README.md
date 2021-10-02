@@ -11,6 +11,6 @@ Currently capable of extracting:
 
 These are all the .ICN, .CMP and .MAP files within the Btech folder.
 
-Remaing assets to extract:
+Remaining assets to extract:
 * World map (Stored within EXE, possibly procedural generated?)
 * Sound files (Need to write converter to WAV)
