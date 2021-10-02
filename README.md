@@ -11,7 +11,7 @@ Currently capable of extracting:
 * `.CMP` Spritesheets
 * `.ICN` Tile Sheets
 
-![SpriteSheet](Documentation/Images/MechSHAP.png)
+![SpriteSheet](Documentation/Images/MECHSHAP.png)
 
 Remaining assets to extract:
 * World map (Stored within EXE, possibly procedural generated?)
