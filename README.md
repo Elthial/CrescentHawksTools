@@ -3,7 +3,7 @@
 This is a .NET CORE toolkit for extracting the assets from the `Crescent Hawks: Inception` game.
 Support for `Crescent Hawks: Revenge` will come later.
 
-![Citadel Map](Documentation\Images\MAP1.png)
+![Citadel Map](Documentation/Images/MAP1.png)
 
 Currently capable of extracting:
 * `.ICN`, `.CMP` Fullscreen graphics
@@ -11,7 +11,7 @@ Currently capable of extracting:
 * `.CMP` Spritesheets
 * `.ICN` Tile Sheets
 
-![SpriteSheet](Documentation\Images\MechSHAP.png)
+![SpriteSheet](Documentation/Images/MechSHAP.png)
 
 Remaining assets to extract:
 * World map (Stored within EXE, possibly procedural generated?)
