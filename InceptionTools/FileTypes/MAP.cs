@@ -16,19 +16,42 @@ namespace InceptionTools
             log.Debug($"Loading File: {Path.GetFileName(FilePath)}");
             log.Debug($"FileSize {Size}");
                
-            Variable1 = ReadContents(1).First(); //3092:5F9C, 0x01
-            Variable2 = ReadContents(1).First(); //3092:5F98, 0x01
-            Variable3 = ReadContents(1).First(); //3092:5F94, 0x01   
+            Header1 = ReadContents(1).First(); //3092:5F9C, 0x01 
+            Header2 = ReadContents(1).First(); //3092:5F98, 0x01 
+            Header3 = ReadContents(1).First(); //3092:5F94, 0x01  
             MapSizeX = ReadContents(1).First(); //3092:5F9E, 0x01
-            MapSizeY = ReadContents(1).First(); //3092:5F96, 0x01
-            Variable6 = ReadContents(0x80);   // 246C: A461, 0x80
-            Variable7 = ReadContents(0x100); //246C: A561, 0x100
-            Variable8 = ReadContents(0x20);    // 3092:4564, 0x20
-            Variable9 = ReadContents(0x20);    //3092:4596, 0x20
-            Variable10 = ReadContents(0x20);   // 3092:39B4, 0x20
-            Variable11 = ReadContents(0x20);   //3092:39D4, 0x20
-            Variable12 = ReadContents(0x10);   //0x3092:4602, 0x10
-            Variable13 = ReadContents(0x08);   //3092:3768, 0x08
+            MapSizeY = ReadContents(1).First(); //3092:5F96, 0x01 //5
+            RawNPCNames = System.Text.Encoding.Default.GetString(ReadContents(0x80));   // 246C: A461, 0x80 //133
+            RawBuildingNames = ReadContents(0x100); //246C: A561, 0x100 //389
+            Variable8 = ReadContents(0x20);    // 3092:4564, 0x20 /421
+            Variable9 = ReadContents(0x20);    //3092:4596, 0x20 //453
+            Variable10 = ReadContents(0x20);   // 3092:39B4, 0x20 //485
+            Variable11 = ReadContents(0x20);   //3092:39D4, 0x20 //517
+            Variable12 = ReadContents(0x10);   //0x3092:4602, 0x10 //533
+            Variable13 = ReadContents(0x08);   //3092:3768, 0x08 //541
+                        
+            var Namearr = RawNPCNames.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for(int i = 0; i < 8; i++)
+            {
+                NPCNames.Add(Namearr[i]);
+            }
+
+            var RawBuildingNamesArr = System.Text.Encoding.Default.GetString(RawBuildingNames).Split(new char[] { '\0' }, StringSplitOptions.None);
+
+            foreach (string s in RawBuildingNamesArr)
+            {
+                if (s.StartsWith("MAP"))
+                    break;
+
+                BuildingNames.Add(s);
+            }
+
+            
+            var str3 = System.Text.Encoding.Default.GetString(Variable8);
+
+            
+
 
             log.Debug($"FileSize {Size}");
             log.Debug($"FileSize {ContentsIndex}");
@@ -45,13 +68,16 @@ namespace InceptionTools
             {
                 throw new ArgumentException("Image file extensions must be .MTP");
             }
-        }    
-       
-        public byte Variable1 { get; }
-        public byte Variable2 { get; }
-        public byte Variable3 { get; }  
-        public byte[] Variable6 { get; }
-        public byte[] Variable7 { get; }
+        }
+
+        List<string> NPCNames = new List<string>();
+        List<string> BuildingNames = new List<string>();
+
+        private byte Header1; //Always Zero.
+        private byte Header2; //Always Zero.
+        private byte Header3; //Always Zero. 
+        private string RawNPCNames;
+        private byte[] RawBuildingNames;
         public byte[] Variable8 { get; }
         public byte[] Variable9 { get; }
         public byte[] Variable10 { get; }
