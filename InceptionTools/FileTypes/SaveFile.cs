@@ -31,14 +31,14 @@ namespace InceptionTools.FileTypes
             CharacterSlot06 = new Infantry(ReadContents(17));  
             CharacterSlot07 = new Infantry(ReadContents(17)); 
             CharacterSlot08 = new Infantry(ReadContents(17));
-            CharacterSlot09 = new Infantry(ReadContents(17));
-            CharacterSlot10 = new Infantry(ReadContents(17));
-            CharacterSlot11 = new Infantry(ReadContents(17));
-            CharacterSlot12 = new Infantry(ReadContents(17));
-            CharacterSlot13 = new Infantry(ReadContents(17));
-            CharacterSlot14 = new Infantry(ReadContents(17));
-            CharacterSlot15 = new Infantry(ReadContents(17));
-            CharacterSlot16 = new Infantry(ReadContents(17)); //273
+            EnemyInfantry01 = new Infantry(ReadContents(17));
+            EnemyInfantry02 = new Infantry(ReadContents(17));
+            EnemyInfantry03 = new Infantry(ReadContents(17));
+            EnemyInfantry04 = new Infantry(ReadContents(17));
+            EnemyInfantry05 = new Infantry(ReadContents(17));
+            EnemyInfantry06 = new Infantry(ReadContents(17));
+            EnemyInfantry07 = new Infantry(ReadContents(17));
+            EnemyInfantry08 = new Infantry(ReadContents(17)); //273
 
             LanceSlot01 = new Mech(ReadContents(125));
             LanceSlot02 = new Mech(ReadContents(125));
@@ -104,14 +104,14 @@ namespace InceptionTools.FileTypes
         public Infantry CharacterSlot06 { get; }
         public Infantry CharacterSlot07 { get; }
         public Infantry CharacterSlot08 { get; }
-        public Infantry CharacterSlot09 { get; }
-        public Infantry CharacterSlot10 { get; }
-        public Infantry CharacterSlot11 { get; }
-        public Infantry CharacterSlot12 { get; }
-        public Infantry CharacterSlot13 { get; }
-        public Infantry CharacterSlot14 { get; }
-        public Infantry CharacterSlot15 { get; }
-        public Infantry CharacterSlot16 { get; }
+        public Infantry EnemyInfantry01 { get; }
+        public Infantry EnemyInfantry02 { get; }
+        public Infantry EnemyInfantry03 { get; }
+        public Infantry EnemyInfantry04 { get; }
+        public Infantry EnemyInfantry05 { get; }
+        public Infantry EnemyInfantry06 { get; }
+        public Infantry EnemyInfantry07 { get; }
+        public Infantry EnemyInfantry08 { get; }
 
         public Mech LanceSlot01 { get; }
         public Mech LanceSlot02 { get; }
