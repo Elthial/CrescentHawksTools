@@ -37,12 +37,12 @@ namespace InceptionTools.Data
                 { CriticalSlot.L_Torso,   new InternalStructure( RawData[35], RawData[104])},
             };
 
-            Actuators = new Dictionary<Limb, Actuator>()
+            Actuators = new Dictionary<MechLimb, Actuator>()
             {
-                { Limb.R_Arm, new Actuator( RawData[36], RawData[105])},
-                { Limb.R_Leg, new Actuator( RawData[36], RawData[105])},       
-                { Limb.L_Arm, new Actuator( RawData[37], RawData[106])},
-                { Limb.L_Leg, new Actuator( RawData[37], RawData[106])},          
+                { MechLimb.R_Arm, new Actuator( RawData[36], RawData[105])},
+                { MechLimb.R_Leg, new Actuator( RawData[36], RawData[105])},       
+                { MechLimb.L_Arm, new Actuator( RawData[37], RawData[106])},
+                { MechLimb.L_Leg, new Actuator( RawData[37], RawData[106])},          
             };
 
             EngineHeatSinks = RawData[38];
@@ -86,7 +86,7 @@ namespace InceptionTools.Data
 
         public Dictionary<CriticalSlot, Critical> CriticalSlots { get; }
 
-        public Dictionary<Limb, Actuator> Actuators { get; }
+        public Dictionary<MechLimb, Actuator> Actuators { get; }
 
         public Dictionary<int, Ammo> Ammo { get; }
         
@@ -95,7 +95,8 @@ namespace InceptionTools.Data
         public int WalkMove { get; }
         public int JumpMove { get; }
 
-        public override string ToString()
+        public override string ToString() => $"{Name}|{Tonnage} Tons";        
+        public string ToStats()
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("--------------------------------");
@@ -131,10 +132,10 @@ namespace InceptionTools.Data
             sb.AppendLine("--------------------------------");
             sb.AppendLine($"Actuators");
             sb.AppendLine("--------------------------------");
-            sb.AppendLine($"R.Arm: {Actuators[Limb.R_Arm]}");
-            sb.AppendLine($"R.Leg: {Actuators[Limb.R_Leg]}");           
-            sb.AppendLine($"L Arm: {Actuators[Limb.L_Arm]}");
-            sb.AppendLine($"L Leg: {Actuators[Limb.L_Leg]}");
+            sb.AppendLine($"R.Arm: {Actuators[MechLimb.R_Arm]}"); //OK or Gone
+            sb.AppendLine($"R.Leg: {Actuators[MechLimb.R_Leg]}");           
+            sb.AppendLine($"L Arm: {Actuators[MechLimb.L_Arm]}");
+            sb.AppendLine($"L Leg: {Actuators[MechLimb.L_Leg]}");
             sb.AppendLine("--------------------------------");
             sb.AppendLine($"Ammo");
             sb.AppendLine("--------------------------------");
@@ -167,14 +168,13 @@ namespace InceptionTools.Data
         {
             for (int i = 0; i < CriticalSlots[CS].Size; i++)
             {
-                if ((CriticalComponent)CriticalSlots[CS].Slots[i] >= CriticalComponent.SmallLaser 
-                 && (CriticalComponent)CriticalSlots[CS].Slots[i] != CriticalComponent.HeatSink)
+                if ((MechComponent)CriticalSlots[CS].Slots[i] >= MechComponent.SmallLaser 
+                 && (MechComponent)CriticalSlots[CS].Slots[i] != MechComponent.HeatSink)
                 {
-                    sb.AppendLine($"{(CriticalComponent)CriticalSlots[CS].Slots[i]}         {CS}");
+                    sb.AppendLine($"{(MechComponent)CriticalSlots[CS].Slots[i]}         {CS}");
                 }
             }
             return sb;
         }
-
     }
 }

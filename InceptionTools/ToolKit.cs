@@ -1,5 +1,6 @@
 ﻿using InceptionTools.Data;
 using InceptionTools.Data.Mechs;
+using InceptionTools.FileTypes;
 using log4net.Repository;
 using System;
 using System.IO;
@@ -15,12 +16,14 @@ namespace InceptionTools
             LoadLog4Net();
             log.Info("Log4Net Loaded");
 
+            //var save = new SaveFile(@"G:\btech\GAME_Mission2_Comstar_BakPhar10");
+
             //var data = new GameData();
 
             //Chameleon C = new Chameleon();
 
             //Mech Test = new Mech(C.RawData);
-            //Console.WriteLine(Test.ToString());
+            //Console.WriteLine(Test.ToStats());
 
 
 
@@ -42,6 +45,11 @@ namespace InceptionTools
             Console.WriteLine("Please enter path to btech folder");
             Console.WriteLine(@"Example: D:\btech\");
             string sourceFolder = Console.ReadLine();
+
+
+
+
+
 
             var Assets = new AssetExtractor();
             Assets.ExtractToFileSystem(sourceFolder);

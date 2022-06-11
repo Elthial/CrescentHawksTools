@@ -1,6 +1,6 @@
 ﻿namespace InceptionTools
 {
-    public enum Limb
+    public enum MechLimb
     {
         R_Arm = 0,
         R_Leg,    

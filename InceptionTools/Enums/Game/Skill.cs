@@ -1,6 +1,6 @@
 ﻿namespace InceptionTools
 {
-    public enum Skills
+    public enum Skill
     {
         BowsAndBlade = 0,
         Pistol,
@@ -9,5 +9,10 @@
         Piloting,
         Tech,
         Medical
+    }
+
+    public enum SkillLevel
+    {
+        Unskilled = 0
     }
 }

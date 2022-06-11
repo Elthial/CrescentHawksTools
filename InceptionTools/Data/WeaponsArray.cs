@@ -15,7 +15,7 @@ namespace InceptionTools
             Heat = RawData[13];
             Variable4 = RawData[14];
             Range = RawData[15];
-            Skill = (Skills)RawData[16];
+            Skill = (Skill)RawData[16];
         }
 
         public string Name {get; }
@@ -24,7 +24,7 @@ namespace InceptionTools
         public int Heat { get; }
         public int Variable4 { get; }  //Sound effect?
         public int Range { get; }  
-        public Skills Skill { get; }
+        public Skill Skill { get; }
 
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace InceptionTools
 {
-    public enum CriticalComponent
+    public enum MechComponent
 	{
        // (+$80 - destroyed)
 		
