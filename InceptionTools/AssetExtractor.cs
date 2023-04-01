@@ -1,5 +1,7 @@
-﻿using InceptionTools.Graphics;
+﻿using InceptionTools.FileTypes;
+using InceptionTools.Graphics;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 
 namespace InceptionTools
@@ -10,14 +12,17 @@ namespace InceptionTools
 
         private string _SourceFolder;
         private EGA EGA;
+        private RunLengthEncoding RLE;
         private Dictionary<string, List<byte[]>> TileSets = new Dictionary<string, List<byte[]>>();
         public void ExtractToFileSystem(string SourceFolder)
         {
             EGA = new EGA();
+            RLE = new RunLengthEncoding();
             _SourceFolder = SourceFolder;
 
             ExtractImageFiles();
             ExtractMapFiles();
+            ExtractAnimationFiles();
         }
 
         private void ExtractMapFiles()
@@ -60,6 +65,53 @@ namespace InceptionTools
             }
         }
 
+        private void ExtractAnimationFiles()
+        {
+            //Some of these animations need custom Palettes
+            var EGA_Palette = new Palette();
+            var CHI_Files = new List<AnimationFile>()
+            {
+                new AnimationFile(Path.Combine(_SourceFolder, "o0.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o1.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o2.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o3.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o4.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o5.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o6.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o7.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o8.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o9.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o10.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o11.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o12.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o13.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o14.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o15.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o16.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o17.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o18.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o19.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o20.ANM"), EGA_Palette),
+                new AnimationFile(Path.Combine(_SourceFolder, "o21.ANM"), EGA_Palette)
+            };            
+
+            foreach (var f in CHI_Files)
+            {
+                log.Info("Crescent Hawks: Inception toolkit");
+                log.Info("Current file Header Info");
+                log.Info("----------------------------");
+                log.Info($"Filename: {f.Name}");
+                log.Info($"FileSize: {f.Size}");            
+                log.Info("----------------------------");
+                                
+                byte[] OutputArray = RLE.Decompress_Animation(f.CompressedContents, f.StartPos);
+
+                f.DecompressedContents = EGA.Write2ModeConverter(OutputArray);
+
+                EGA.DrawAnimationToFile(f);
+            }
+        }
+
         private void ExtractImageFiles()
         {
             var EGA_Palette = new Palette();
@@ -92,6 +144,8 @@ namespace InceptionTools
 
             //TODO: Update code with TileSet image which has max number of images in file to remove empty tiles
 
+            var RLE = new RunLengthEncoding();
+
             foreach (var f in CHI_Files)
             {
                 log.Info("Crescent Hawks: Inception toolkit");
@@ -101,9 +155,7 @@ namespace InceptionTools
                 log.Info($"FileSize (minus two bytes): {f.Size}");
                 log.Info($"RLE Format: Format0{f.CompressionFormat}");
                 log.Info("----------------------------");
-
-                var RLE = new RunLengthEncoding();
-
+                                
                 byte[] OutputArray;
 
                 if (f.CompressionFormat.Equals(1))

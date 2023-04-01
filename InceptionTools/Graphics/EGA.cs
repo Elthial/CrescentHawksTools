@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InceptionTools.FileTypes;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -89,6 +90,37 @@ namespace InceptionTools.Graphics
             }
 
             return TileSet;
+        }
+
+        public void DrawAnimationToFile(AnimationFile f)
+        {
+            const int ScreenPixels = 7744;
+            //EGA Screens are default 92 x 92 = 8,464 pixels
+
+            var ImageData = f.DecompressedContents;
+            var ImageWidth = f.Width;
+            var Filename = f.Name;
+            var palette = f.Palette;
+
+            int ImageHeight = ScreenPixels / ImageWidth;
+            using (var bmp = new Bitmap(ImageWidth, ImageHeight, PixelFormat.Format32bppArgb))
+            {
+                log.Info($"Creating {ImageWidth} x {ImageHeight} BMP Image.");
+                int bytecount = 0;
+
+                for (int y = 0; y < ImageHeight; y++)
+                {
+                    for (int x = 0; x < ImageWidth; x++)
+                    {
+                        bmp.SetPixel(x, y, palette.GetColour(ImageData[bytecount]));
+                        bytecount++;
+                    }
+                }
+
+                log.Info(@$"Saving Assets\{Filename}.bmp");
+                Directory.CreateDirectory(@"Assets\Animations");
+                bmp.Save(@$"Assets\Animations\{Filename}.bmp");
+            }
         }
 
         public void DrawImageToFile(InceptionImageFile f)
