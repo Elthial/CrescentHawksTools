@@ -1,7 +1,12 @@
-﻿using log4net.Repository;
+﻿using InceptionTools.Graphics;
+using log4net.Repository;
 using System;
+using System.Drawing.Imaging;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Data;
+using System.Collections.Generic;
 
 namespace InceptionTools
 {
@@ -19,10 +24,12 @@ namespace InceptionTools
             //Mech Test = new Mech(C.RawData);
             //Console.WriteLine(Test.ToStats());
 
-
+            
             Console.WriteLine("Please enter path to btech folder");
             Console.WriteLine(@"Example: D:\btech\");
             string sourceFolder = Console.ReadLine();
+
+         
 
             var Assets = new AssetExtractor();
             Assets.ExtractToFileSystem(sourceFolder);
@@ -46,5 +53,5 @@ namespace InceptionTools
                 Console.ReadLine();
             }
         }
-    }
+        }    
 }

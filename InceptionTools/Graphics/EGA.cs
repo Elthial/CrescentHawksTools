@@ -123,6 +123,45 @@ namespace InceptionTools.Graphics
             }
         }
 
+        public void DrawSpriteToFile(InceptionImageFile f, int SpriteId, int x0, int y0, int SizeX, int SizeY)
+        {
+            const int ScreenPixels = 64000;
+            //EGA Screens are default 320 x 200 = 64000 pixels
+
+            var ImageData = f.DecompressedContents;
+            var ImageWidth = f.Width;
+            var Filename = f.Name;
+            var palette = f.Palette;
+
+            int ImageHeight = ScreenPixels / ImageWidth;
+            using (var bmp = new Bitmap(SizeX, SizeY, PixelFormat.Format32bppArgb))
+            {
+                log.Info($"Creating {SizeX} x {SizeY} BMP Image.");
+                int bytecount = 0;
+
+                for (int y = 0; y < ImageHeight; y++)
+                {
+                    for (int x = 0; x < ImageWidth; x++)
+                    {
+                        var ValidX = (x >= x0) && (x < x0 + SizeX);
+                        var ValidY = (y >= y0) && (y < y0 + SizeY);
+
+                        if (ValidX && ValidY)
+                        {
+                            var Xpos = (x - x0);
+                            var Ypos = (y - y0);
+
+                            bmp.SetPixel(Xpos, Ypos, palette.GetColour(ImageData[bytecount]));
+                        }                        
+                        bytecount++;
+                    }
+                }
+
+                log.Info(@$"Saving Assets\Sprites\{Filename}_{SpriteId}.bmp");
+                Directory.CreateDirectory(@"Assets\Sprites");
+                bmp.Save(@$"Assets\Sprites\{Filename}_{SpriteId}.bmp");
+            }
+        }
         public void DrawImageToFile(InceptionImageFile f)
         {
             const int ScreenPixels = 64000;
