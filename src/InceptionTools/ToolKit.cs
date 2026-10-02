@@ -25,7 +25,7 @@ public static class Program
 
             string command = args[0].ToLowerInvariant();
             CommandLine options = CommandLine.Parse(args.Skip(1),
-                "game-dir", "output", "output-dir", "metadata", "offset", "count", "group", "mode");
+                "game-dir", "output", "output-dir", "metadata", "offset", "count", "group", "mode", "seed");
             ValidateCommand(command, options);
 
             Action<CommandLine> handler = command switch
@@ -49,6 +49,7 @@ public static class Program
                 "inspect-map" => RunMapInspection,
                 "export-map" => RunMapExport,
                 "export-maps" => RunAllMapsExport,
+                "export-world-map" => RunWorldMapExport,
                 "export-save-state" => RunSaveStateExport,
                 "import-save-state" => RunSaveStateImport,
                 "inspect-sif" => RunSifInspection,
@@ -93,6 +94,7 @@ public static class Program
             "inspect-map" => (1, 1, "inspect-map FILE [options]", Options("game-dir", "json")),
             "export-map" => (1, 1, "export-map FILE [options]", Options("game-dir", "output", "metadata", "force")),
             "export-maps" => (0, 0, "export-maps [options]", Options("game-dir", "output-dir", "force")),
+            "export-world-map" => (0, 0, "export-world-map [options]", Options("game-dir", "output", "seed", "force")),
             "export-save-state" => (1, 1, "export-save-state FILE [options]", Options("game-dir", "output", "force")),
             "import-save-state" => (2, 2, "import-save-state FILE STATE.txt [options]", Options("game-dir", "output", "force")),
             "inspect-sif" => (0, 1, "inspect-sif [FILE] [options]", Options("game-dir", "json")),
@@ -339,6 +341,18 @@ public static class Program
             result.OutputDirectory + " (" + result.TotalOutputLength + " PNG bytes total).");
     }
 
+    private static void RunWorldMapExport(CommandLine options)
+    {
+        string outputPath = options.Get("output") ?? "inception-world-map.html";
+        uint? editorSeed = ParseOptionalMapSeed(options.Get("seed"));
+        GameInstallation installation = GameInstallationLocator.Locate(options.Get("game-dir"));
+        WorldMapExportResult result = WorldMapHtmlExporter.Export(installation, outputPath,
+            editorSeed, options.Has("force"));
+        Console.WriteLine("Exported scrollable " + result.InitialPreset + " world map with " +
+            result.FixedLocationCount + " fixed-map markers to " + result.OutputPath + " (" +
+            result.OutputLength + " bytes).");
+    }
+
     private static void RunSaveStateExport(CommandLine options)
     {
 
@@ -449,6 +463,16 @@ public static class Program
         return long.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
     }
 
+    private static uint? ParseOptionalMapSeed(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        long parsed = ParseNumber(value, 0);
+        if (parsed < 0 || parsed > 0xFFFFFF)
+            throw new ArgumentOutOfRangeException(nameof(value),
+                "--seed must be a 24-bit original RNG state (0 to 0xFFFFFF).");
+        return (uint)parsed;
+    }
+
     private static void PrintHelp()
     {
         Console.WriteLine("InceptionTools commands:");
@@ -471,6 +495,7 @@ public static class Program
         Console.WriteLine("  inspect-map FILE [--game-dir PATH] [--json]");
         Console.WriteLine("  export-map FILE [--game-dir PATH] [--output FILE.png] [--metadata FILE.json] [--force]");
         Console.WriteLine("  export-maps [--game-dir PATH] [--output-dir DIR] [--force]");
+        Console.WriteLine("  export-world-map [--game-dir PATH] [--output FILE.html] [--seed N] [--force]");
         Console.WriteLine("  export-save-state FILE [--game-dir PATH] [--output FILE.txt] [--force]");
         Console.WriteLine("  import-save-state FILE STATE.txt [--game-dir PATH] [--output FILE] [--force]");
         Console.WriteLine("  inspect-sif [FILE] [--game-dir PATH] [--json]");

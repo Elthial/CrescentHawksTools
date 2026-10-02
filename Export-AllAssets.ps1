@@ -160,6 +160,7 @@ function Export-InceptionAssets {
     Invoke-Tool $Tool (Add-ForceArgument @('export-images', '--game-dir', $GameDirectory, '--output-dir', (Join-Path $decoded 'graphics')))
     Invoke-Tool $Tool (Add-ForceArgument @('export-mech-spritesheet', '--game-dir', $GameDirectory, '--output', (Join-Path $decoded 'sprites/mechs.png'), '--metadata', (Join-Path $decoded 'sprites/mechs.json')))
     Invoke-Tool $Tool (Add-ForceArgument @('export-maps', '--game-dir', $GameDirectory, '--output-dir', (Join-Path $decoded 'maps')))
+    Invoke-Tool $Tool (Add-ForceArgument @('export-world-map', '--game-dir', $GameDirectory, '--output', (Join-Path $decoded 'maps/pacifica-world.html')))
     Invoke-Tool $Tool (Add-ForceArgument @('export-animation-gifs', '--game-dir', $GameDirectory, '--output-dir', (Join-Path $decoded 'animations/gif')))
 
     foreach ($animation in [IO.Directory]::EnumerateFiles($GameDirectory, '*.ANM') | Sort-Object) {

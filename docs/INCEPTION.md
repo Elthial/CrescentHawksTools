@@ -383,6 +383,43 @@ export-maps [--game-dir PATH] [--output-dir DIR] [--force]
 dotnet run --project src/InceptionTools -- export-maps --game-dir Chinception --output-dir artifacts/maps
 ```
 
+### `export-world-map`
+
+Export a self-contained HTML viewer for the complete 16-by-16 Pacifica
+(Chara III) world. The browser page reconstructs the procedural terrain,
+renders the original `TINYLAND.CMP` overview tiles, and marks the seven towns
+and four other fixed-map regions. It supports scrolling, pixel-perfect zoom,
+coordinate inspection, independent world and marker visibility, overlay
+filters and location shortcuts. The optional world-vertex overlay displays
+the fixed control lattice using its rendered terrain categories (water,
+forest, plains, hills, mountain and peak); raw indices and values remain
+available on hover. Although it is logically a 17-by-17 corner grid, the
+original code uses a 16-byte row stride, so each row's rightmost vertex aliases
+the next row's leftmost vertex.
+
+```text
+export-world-map [--game-dir PATH] [--output FILE.html] [--seed N] [--force]
+```
+
+```powershell
+dotnet run --project src/InceptionTools -- export-world-map --game-dir Chinception --output artifacts/inception-world-map.html
+dotnet run --project src/InceptionTools -- export-world-map --game-dir Chinception --seed 0x123456 --output artifacts/alternate-world.html
+```
+
+Without `--seed`, the viewer opens on the **Pacifica (Chara III)** preset. It
+starts the original three-byte RNG from the executable's initial `0x020304`
+state and makes the same 256 calls that `Start_Game` uses to fill the
+construction table. This fixes a misleading earlier assumption that the
+zero-filled executable workspace was itself the terrain seed. A numeric seed
+replaces that 24-bit RNG state; it is an editor control and not a field stored
+by the original map or save formats. The seed and preset can also be changed
+live inside the exported viewer.
+
+The generated HTML embeds pixels decoded from the user's `TINYLAND.CMP` and is
+therefore a local extraction output which should not be redistributed. It is a
+self-contained browser file: no Node.js installation, package manager, web
+server or network connection is required.
+
 ## Command-line save editor
 
 The editor uses a readable text representation rather than modifying opaque

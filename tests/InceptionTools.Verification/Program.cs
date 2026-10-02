@@ -65,6 +65,7 @@ internal static class Program
             File.WriteAllBytes(Path.Combine(fixture, "MECHSHAP.CMP"), compressedImageFixture);
             File.WriteAllBytes(Path.Combine(fixture, "ANIMATE.ICN"), compressedImageFixture);
             File.WriteAllBytes(Path.Combine(fixture, "BTTLTECH.ICN"), compressedImageFixture);
+            File.WriteAllBytes(Path.Combine(fixture, "TINYLAND.CMP"), compressedImageFixture);
             byte[] mapFixture = new byte[MtpMapRecord.StandardHeaderLength + 64];
             mapFixture[3] = 8;
             mapFixture[4] = 8;
@@ -182,6 +183,49 @@ internal static class Program
             Assert(mapRecord.TileIds[0] == 0, "MTP tile IDs are defensive copies");
             AssertThrows<InvalidDataException>(() => MtpMapRecord.ParseStandard(
                 mapFixture.Take(mapFixture.Length - 1).ToArray()), "truncated MTP map rejected");
+            byte[] pacifica = ProceduralWorldGenerator.GeneratePacifica();
+            byte[] pacificaAgain = ProceduralWorldGenerator.Generate(
+                PacificaWorldPreset.CreateSeedTable(), PacificaWorldPreset.WorldVertices);
+            byte[] customWorld = ProceduralWorldGenerator.GenerateFromEditorSeed(0x123456);
+            Assert(pacifica.Length == 128 * 128 && pacifica.SequenceEqual(pacificaAgain),
+                "Pacifica procedural world is complete and deterministic");
+            Assert(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(pacifica)) ==
+                "7EEBD102F87596A53D28F502056BC24A326BBF406343F2E49C4B815089F7CD46",
+                "Pacifica procedural world descriptor hash");
+            Assert(PacificaWorldPreset.WorldVertices.Length == 274 &&
+                Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+                    PacificaWorldPreset.CreateSeedTable())) ==
+                    "418F3B67E05FD2B94DCF6ECEFAF8FC5D43E181609B8C368DE3AC7093B12451FD",
+                "Pacifica preset retains original vertices and startup RNG construction table");
+            AssertThrows<ArgumentOutOfRangeException>(() =>
+                PacificaWorldPreset.CreateSeedTable(0x1000000),
+                "map seed is restricted to original three-byte RNG state");
+            Assert(!pacifica.SequenceEqual(customWorld),
+                "custom editor seed changes procedural terrain");
+            byte[] overviewTileIds = ProceduralWorldGenerator.BuildOverviewTileIds(pacifica);
+            Assert(overviewTileIds.Length == pacifica.Length && overviewTileIds.Max() < 66,
+                "Pacifica terrain maps to the complete original TINYLAND overview set");
+            Assert(PacificaWorldPreset.FixedLocations.Count == 11 &&
+                PacificaWorldPreset.FixedLocations.Count(location => location.IsTown) == 7,
+                "Pacifica fixed-map and town marker catalog");
+            string worldMapPath = Path.Combine(fixture, "exports", "world-map.html");
+            WorldMapExportResult worldMap = WorldMapHtmlExporter.Export(located, worldMapPath);
+            string worldHtml = File.ReadAllText(worldMapPath);
+            Assert(worldMap.FixedLocationCount == 11 && worldMap.InitialPreset == "Pacifica (Chara III)" &&
+                worldHtml.Contains("Pacifica (Chara III) world map", StringComparison.Ordinal) &&
+                worldHtml.Contains("Village 1", StringComparison.Ordinal) &&
+                worldHtml.Contains("Custom editor seed", StringComparison.Ordinal) &&
+                worldHtml.Contains("World vertices", StringComparison.Ordinal) &&
+                worldHtml.Contains("function drawVertices()", StringComparison.Ordinal) &&
+                worldHtml.Contains("function terrainType(value)", StringComparison.Ordinal) &&
+                worldHtml.Contains("id=\"world\" checked", StringComparison.Ordinal) &&
+                worldHtml.Contains("const vertices=[0,2,0,3", StringComparison.Ordinal) &&
+                worldHtml.Contains("[vertices[r],vertices[r+1],vertices[r+16],vertices[r+17]]",
+                    StringComparison.Ordinal) &&
+                !worldHtml.Contains("const vertices=\"", StringComparison.Ordinal),
+                "self-contained scrollable world-map export");
+            AssertThrows<IOException>(() => WorldMapHtmlExporter.Export(located, worldMapPath),
+                "world-map export refuses overwrite");
             MtpMapRecord starMapRecord = MtpMapRecord.ParseStarMap(new byte[32 * 24]);
             Assert(!starMapRecord.HasStandardHeader && starMapRecord.Width == 32 &&
                 starMapRecord.Height == 24 && starMapRecord.TileIds.Length == 768,
