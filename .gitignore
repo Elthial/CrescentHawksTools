@@ -332,3 +332,17 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+# User-supplied original game installations
+/Chinception/
+/Chrevenge/
+
+# Toolkit-generated output
+/InceptionTools.Output/
+/RevengeTools.Output/
+/images/
+/maps/
+/animation-gifs/
+/*-frames/
+/*-state.txt
+/*.edited

@@ -1,0 +1,43 @@
+name: Bug report
+description: Report an incorrect decode, export, inspection, or save-editing result
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach original game files, extracted asset sets, or private saves.
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Toolset
+      options:
+        - InceptionTools
+        - RevengeTools
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: Include arguments, but redact private paths.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, architecture, and .NET SDK version.
+    validations:
+      required: true

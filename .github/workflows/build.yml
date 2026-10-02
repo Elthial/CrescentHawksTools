@@ -1,0 +1,21 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet restore CrescentHawksTools.sln
+      - run: dotnet build CrescentHawksTools.sln --configuration Release --no-restore
+      - run: dotnet run --project tests/InceptionTools.Verification --configuration Release --no-build
+      - run: dotnet run --project tests/RevengeTools.Verification --configuration Release --no-build

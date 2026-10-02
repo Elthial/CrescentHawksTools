@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationFrameDecoder.cs" Link="Animation\AnimationFrameDecoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationPixelDecoder.cs" Link="Animation\AnimationPixelDecoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationPngEncoder.cs" Link="Animation\AnimationPngEncoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationGifEncoder.cs" Link="Animation\AnimationGifEncoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationGifTiming.cs" Link="Animation\AnimationGifTiming.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationTimingDecoder.cs" Link="Animation\AnimationTimingDecoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Animation\AnimationFrameExporter.cs" Link="Animation\AnimationFrameExporter.cs" />
+    <Compile Include="..\..\src\InceptionTools\Audio\PcSpeakerPitch.cs" Link="Audio\PcSpeakerPitch.cs" />
+    <Compile Include="..\..\src\InceptionTools\Audio\PcmWaveEncoder.cs" Link="Audio\PcmWaveEncoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Audio\SquareWaveBuilder.cs" Link="Audio\SquareWaveBuilder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Audio\SifAudio.cs" Link="Audio\SifAudio.cs" />
+    <Compile Include="..\..\src\InceptionTools\Audio\SoundEffectAudio.cs" Link="Audio\SoundEffectAudio.cs" />
+    <Compile Include="..\..\src\InceptionTools\Graphics\CompressedImageDecoder.cs" Link="Graphics\CompressedImageDecoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Graphics\CompressedGraphicsExporter.cs" Link="Graphics\CompressedGraphicsExporter.cs" />
+    <Compile Include="..\..\src\InceptionTools\Graphics\EgaIndexedPngEncoder.cs" Link="Graphics\EgaIndexedPngEncoder.cs" />
+    <Compile Include="..\..\src\InceptionTools\Graphics\MechShapeSpriteCatalog.cs" Link="Graphics\MechShapeSpriteCatalog.cs" />
+    <Compile Include="..\..\src\InceptionTools\Graphics\MechSpriteSheetComposer.cs" Link="Graphics\MechSpriteSheetComposer.cs" />
+    <Compile Include="..\..\src\InceptionTools\Graphics\MechSpriteSheetExporter.cs" Link="Graphics\MechSpriteSheetExporter.cs" />
+    <Compile Include="..\..\src\InceptionTools\Maps\MtpMapExporter.cs" Link="Maps\MtpMapExporter.cs" />
+    <Compile Include="..\..\src\InceptionTools\Binary\BoundedBinaryReader.cs" Link="Binary\BoundedBinaryReader.cs" />
+    <Compile Include="..\..\src\InceptionTools\Installation\GameInstallation.cs" Link="Installation\GameInstallation.cs" />
+    <Compile Include="..\..\src\InceptionTools\Installation\InstallationInventory.cs" Link="Installation\InstallationInventory.cs" />
+    <Compile Include="..\..\src\InceptionTools\Installation\InventoryReportWriter.cs" Link="Installation\InventoryReportWriter.cs" />
+    <Compile Include="..\..\src\InceptionTools\Installation\FileInspector.cs" Link="Installation\FileInspector.cs" />
+    <Compile Include="..\..\src\InceptionTools\Inspection\SaveGameInspector.cs" Link="Inspection\SaveGameInspector.cs" />
+    <Compile Include="..\..\src\InceptionTools\Inspection\WeaponTableInspector.cs" Link="Inspection\WeaponTableInspector.cs" />
+    <Compile Include="..\..\src\InceptionTools\Inspection\BldDisassembler.cs" Link="Inspection\BldDisassembler.cs" />
+    <Compile Include="..\..\src\InceptionTools\Inspection\AnimationInspector.cs" Link="Inspection\AnimationInspector.cs" />
+    <Compile Include="..\..\src\InceptionTools\Records\CharacterRecord.cs" Link="Records\CharacterRecord.cs" />
+    <Compile Include="..\..\src\InceptionTools\Records\MechRecord.cs" Link="Records\MechRecord.cs" />
+    <Compile Include="..\..\src\InceptionTools\Records\WeaponRecord.cs" Link="Records\WeaponRecord.cs" />
+    <Compile Include="..\..\src\InceptionTools\Records\SaveGameRecord.cs" Link="Records\SaveGameRecord.cs" />
+    <Compile Include="..\..\src\InceptionTools\Records\AnmFileRecord.cs" Link="Records\AnmFileRecord.cs" />
+    <Compile Include="..\..\src\InceptionTools\Records\MtpMapRecord.cs" Link="Records\MtpMapRecord.cs" />
+    <Compile Include="..\..\src\InceptionTools\SaveEditing\SaveState.cs" Link="SaveEditing\SaveState.cs" />
+    <Compile Include="..\..\src\InceptionTools\SaveEditing\SaveStateEditor.cs" Link="SaveEditing\SaveStateEditor.cs" />
+    <Compile Include="..\..\src\InceptionTools\SaveEditing\SaveStateTextFormat.cs" Link="SaveEditing\SaveStateTextFormat.cs" />
+    <Compile Include="..\..\src\InceptionTools\SaveEditing\SaveStateFileService.cs" Link="SaveEditing\SaveStateFileService.cs" />
+    <Compile Include="..\..\src\InceptionTools\Data\WeaponsArray.cs" Link="Data\WeaponsArray.cs" />
+    <Compile Include="..\..\src\InceptionTools\Enums\Game\Skill.cs" Link="Enums\Game\Skill.cs" />
+  </ItemGroup>
+</Project>
