@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference='Stop'
 $solution=Join-Path $PSScriptRoot 'CrescentHawksTools.sln'
 
-dotnet restore $solution
+dotnet restore $solution --configfile (Join-Path $PSScriptRoot 'NuGet.Config')
 if($LASTEXITCODE -ne 0){throw 'Restore failed.'}
 
 dotnet build $solution --configuration $Configuration --no-restore

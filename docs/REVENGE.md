@@ -1,12 +1,29 @@
 # RevengeTools
 
-RevengeTools is a dependency-free .NET 8 command-line toolkit for inspecting,
+For decoded game-data tables, see the
+[Revenge reference section](reference/README.md#the-crescent-hawks-revenge).
+
+RevengeTools is a dependency-free .NET 10 command-line toolkit for inspecting,
 extracting, and safely editing data from a user-supplied DOS installation of
 *BattleTech: The Crescent Hawks' Revenge*.
 
 The original game is not included. By default the toolkit locates it through
 `--game-dir`, the `BTCHR_GAME_DIR` environment variable, or an ignored
 `Chrevenge/` directory.
+
+## Complete asset extraction
+
+From the repository root, extract every source file plus all supported decoded
+forms into a filesystem-browsable directory:
+
+```powershell
+.\Export-AllAssets.ps1 -Game Revenge -RevengeGameDirectory "D:\Games\REVENGE"
+```
+
+The default `ExtractedAssets/Revenge` tree contains raw files grouped by
+purpose, decoded screens, palettes, fonts, tile sheets, maps, scene evidence,
+unit and weapon data, digital samples, speaker-effect traces and save reports.
+The directory is ignored by Git.
 
 ## Build and verify
 

@@ -2,6 +2,8 @@ namespace RevengeTools.Installation;
 
 public sealed class GameInstallation
 {
+    public const long MaximumInputFileLength = 128L * 1024 * 1024;
+
     public GameInstallation(string directoryPath, string source)
     {
         DirectoryPath = directoryPath;
@@ -18,7 +20,17 @@ public sealed class GameInstallation
 
         string? match = Directory.EnumerateFiles(DirectoryPath)
             .FirstOrDefault(path => Path.GetFileName(path).Equals(fileName, StringComparison.OrdinalIgnoreCase));
-        return match ?? throw new FileNotFoundException("Installation file not found: " + fileName);
+        if (match is null)
+            throw new FileNotFoundException("Installation file not found: " + fileName);
+        EnsureInputSize(match);
+        return match;
+    }
+
+    public static void EnsureInputSize(string path)
+    {
+        long length = new FileInfo(path).Length;
+        if (length > MaximumInputFileLength)
+            throw new InvalidDataException($"Input file is {length} bytes; limit is {MaximumInputFileLength} bytes: {path}");
     }
 }
 
@@ -38,7 +50,8 @@ public static class GameInstallationLocator
         var directory = new DirectoryInfo(Path.GetFullPath(startDirectory ?? Environment.CurrentDirectory));
         while (directory is not null)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "REVENGE.EXE")))
+            if (Directory.EnumerateFiles(directory.FullName)
+                .Any(file => Path.GetFileName(file).Equals("REVENGE.EXE", StringComparison.OrdinalIgnoreCase)))
                 return Validate(directory.FullName, "current/ancestor directory");
 
             string local = Path.Combine(directory.FullName, "Chrevenge");

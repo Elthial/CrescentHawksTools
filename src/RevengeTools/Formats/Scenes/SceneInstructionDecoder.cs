@@ -183,15 +183,15 @@ public static class SceneInstructionDecoder
     private static SceneInstruction Create(int relativeOffset, byte opcode, string name,
         string handlerAddress, byte[] operands, bool endsLinearDecode,
         int? branchTargetInstructionOffset = null) => new()
-    {
-        FileOffset = SceneFile.DataOffset + 2 + relativeOffset,
-        Opcode = opcode,
-        Name = name,
-        HandlerAddress = handlerAddress,
-        Operands = operands,
-        EndsLinearDecode = endsLinearDecode,
-        BranchTargetInstructionOffset = branchTargetInstructionOffset
-    };
+        {
+            FileOffset = SceneFile.DataOffset + 2 + relativeOffset,
+            Opcode = opcode,
+            Name = name,
+            HandlerAddress = handlerAddress,
+            Operands = operands,
+            EndsLinearDecode = endsLinearDecode,
+            BranchTargetInstructionOffset = branchTargetInstructionOffset
+        };
 
     private static string NameFor(byte opcode) => opcode switch
     {

@@ -37,6 +37,7 @@ public static class Program
         VerifyMusicStreams();
         VerifyDigitalSounds();
         VerifySaveAndEditor();
+        VerifyMalformedInputSweep();
         if (args.Length > 0)
             VerifyExternalSaves(args[0]);
         if (args.Length > 1)
@@ -54,6 +55,23 @@ public static class Program
         AssertThrows<InvalidDataException>(() => reader.ReadBytes(3, 2), "bounded range rejects overflow");
         var textReader = new BoundedBinaryReader(new byte[] { (byte)'A', 0, (byte)'B', (byte)' ' }, "text fixture");
         Assert(textReader.ReadFixedAscii(0, 4) == "A", "fixed ASCII stops at first NUL");
+    }
+
+    private static void VerifyMalformedInputSweep()
+    {
+        for (int length = 0; length < 10; length++)
+        {
+            byte[] truncated = new byte[length];
+            AssertThrows<InvalidDataException>(() => CpsImage.Decode(truncated),
+                $"CPS parser rejects truncation length {length}");
+        }
+
+        for (int length = 0; length < UnitRecord.Length; length += 11)
+        {
+            byte[] truncated = new byte[length];
+            AssertThrows<InvalidDataException>(() => UnitRecord.Parse(truncated, 0, 0),
+                $"unit parser rejects truncation length {length}");
+        }
     }
 
     private static void VerifyPalette()

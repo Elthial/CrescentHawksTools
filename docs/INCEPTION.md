@@ -1,5 +1,8 @@
 # InceptionTools
 
+For decoded game-data tables, see the
+[Inception reference section](reference/README.md#the-crescent-hawks-inception).
+
 InceptionTools is a command-line toolkit for inspecting, extracting, converting,
 and safely modifying data from a user-supplied installation of the 1988 DOS
 game *BattleTech: The Crescent Hawk's Inception*.
@@ -11,13 +14,27 @@ saves are local outputs and should not be committed or redistributed.
 
 ## Requirements
 
-- .NET 8 SDK, or a published InceptionTools executable.
+- .NET 10 SDK, or a published InceptionTools executable.
 - A supported game installation containing `BTECH.EXE` and its original data
   files.
 - Windows is required only for the two direct audio playback commands. All
   inspection and export commands are portable.
 
 The project has no third-party package dependencies.
+
+## Complete asset extraction
+
+From the repository root, extract every source file plus all supported decoded
+forms into a filesystem-browsable directory:
+
+```powershell
+.\Export-AllAssets.ps1 -Game Inception -InceptionGameDirectory "D:\Games\BTECH"
+```
+
+The default `ExtractedAssets/Inception` tree contains raw files grouped by
+purpose, decoded graphics, sprites, map images and metadata, animation GIFs and
+individual frames, PC-speaker and Tandy audio, sound effects, BLD
+disassemblies, weapon data and save reports. The directory is ignored by Git.
 
 ## Build and run
 
@@ -38,7 +55,7 @@ After a Release build, the executable can be called directly:
 
 ```powershell
 dotnet build src/InceptionTools/InceptionTools.csproj --configuration Release
-./src/InceptionTools/bin/Release/net8.0/InceptionTools.exe help
+./src/InceptionTools/bin/Release/net10.0/InceptionTools.exe help
 ```
 
 Running without a command prints the same help summary as `help`.
@@ -168,8 +185,9 @@ dotnet run --project src/InceptionTools -- dump-mech GAME1 2 --group enemy --gam
 
 ### `dump-weapons`
 
-Display the executable-resident weapon table captured from the documented game
-profile. This command does not require the external game directory.
+Display typed interoperability metadata recovered from the executable-resident
+weapon table. Verbatim executable bytes are not distributed. This command does
+not require the external game directory.
 
 ```text
 dump-weapons [--json]

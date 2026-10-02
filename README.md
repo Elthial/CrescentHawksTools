@@ -2,7 +2,7 @@
 
 [![build](https://github.com/Elthial/CrescentHawksTools/actions/workflows/build.yml/badge.svg)](https://github.com/Elthial/CrescentHawksTools/actions/workflows/build.yml)
 
-Crescent Hawks Tools is a dependency-free .NET 8 command-line toolkit for
+Crescent Hawks Tools is a dependency-free .NET 10 command-line toolkit for
 inspecting, extracting, converting, and safely editing data from legally owned
 DOS installations of:
 
@@ -46,7 +46,7 @@ game assets are not included and must be supplied from a legally owned copy.
 
 ## Quick start
 
-Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0),
+Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0),
 clone this repository, and build both tools:
 
 ```powershell
@@ -67,6 +67,22 @@ dotnet run --project src/InceptionTools -- inventory --game-dir "D:\Games\BTECH"
 dotnet run --project src/RevengeTools -- inventory --game-dir "D:\Games\REVENGE"
 ```
 
+Extract both installations into a human-browsable local directory:
+
+```powershell
+.\Export-AllAssets.ps1 `
+  -InceptionGameDirectory "D:\Games\BTECH" `
+  -RevengeGameDirectory "D:\Games\REVENGE"
+```
+
+The default `ExtractedAssets` output contains separate `Inception` and
+`Revenge` trees. Each has exact source files under `raw`, directly viewable or
+human-readable conversions under `decoded`, and hashes and inventories under
+`metadata`. Use `-Game Inception` or `-Game Revenge` for one title,
+`-OutputDirectory` to choose another root, and `-Force` to overwrite generated
+files. `ExtractedAssets/` is ignored because its contents derive from the
+user's copyrighted game installation.
+
 You may instead set `BTCHI_GAME_DIR` for Inception or `BTCHR_GAME_DIR` for
 Revenge. Full command syntax and supported formats are documented in the two
 toolset guides above.
@@ -86,13 +102,20 @@ verification passes in one command.
 | Path | Purpose |
 | --- | --- |
 | `src/InceptionTools` | Inception inspection and extraction CLI |
+| `src/InceptionTools.Core` | Reusable Inception parsers, records, and exporters |
 | `src/RevengeTools` | Revenge inspection and extraction CLI |
+| `src/CrescentHawksTools.Cli` | Shared command-line contract |
+| `Export-AllAssets.ps1` | Complete local extraction into browsable per-game trees |
 | `tests` | Dependency-free verification executables |
 | `docs` | Per-game command guides, format notes, and illustrative outputs |
 | `.github/workflows` | Public CI build and verification |
 
 Build products (`bin`, `obj`), local game installations, generated extraction
 directories, edited saves, and private research captures are ignored.
+
+See the [format index](docs/formats/README.md), [game-data reference](docs/reference/README.md),
+and [local conformance guide](docs/CONFORMANCE.md) for the preservation-facing
+contracts behind the commands.
 
 ## Contributing
 

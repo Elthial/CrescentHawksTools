@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
-using RevengeTools.Cli;
+using CrescentHawksTools.Cli;
 using RevengeTools.Formats.Audio;
 using RevengeTools.Formats.Fonts;
 using RevengeTools.Formats.Graphics;
@@ -32,7 +32,9 @@ public static class Program
             }
 
             string command = args[0].ToLowerInvariant();
-            CommandLine options = CommandLine.Parse(args.Skip(1));
+            CommandLine options = CommandLine.Parse(args.Skip(1),
+                "game-dir", "offset", "count", "output", "output-dir", "palette", "scale",
+                "columns", "icons");
             return command switch
             {
                 "inventory" => RunInventory(options),
@@ -86,7 +88,7 @@ public static class Program
 
     private static int RunInventory(CommandLine options)
     {
-        options.RequireOnly("game-dir", "hash", "json", "output");
+        options.RequireOnly("game-dir", "hash", "json", "output", "force");
         GameInstallation installation = Locate(options);
         InstallationInventoryReport report = InstallationInventory.Scan(installation, options.Has("hash"));
         string text = options.Has("json") ? JsonSerializer.Serialize(report, JsonOptions) : FormatInventory(report);
@@ -692,6 +694,7 @@ public static class Program
         var output = new StringBuilder();
         output.AppendLine($"Installation: {report.InstallationPath}");
         output.AppendLine($"Located by: {report.LocatedBy}");
+        output.AppendLine($"Version: {report.DetectedVersion}");
         foreach (InstallationInventoryEntry file in report.Files)
             output.AppendLine($"{file.Name,-16} {file.Category,-12} {(file.Present ? file.Length?.ToString(CultureInfo.InvariantCulture) : "missing"),8}  {file.Validation}");
         output.Append($"Result: {(report.IsValid ? "valid" : "invalid")}");
@@ -739,7 +742,7 @@ public static class Program
 
     private static void PrintHelp()
     {
-        Console.WriteLine("RevengeTools - BattleTech: The Crescent Hawk's Revenge inspection and preservation CLI");
+        Console.WriteLine("RevengeTools - BattleTech: The Crescent Hawks' Revenge inspection and preservation CLI");
         Console.WriteLine();
         Console.WriteLine("  inventory [--game-dir PATH] [--hash] [--json] [--output FILE]");
         Console.WriteLine("  inspect FILE [--offset N] [--count N] [--game-dir PATH]");

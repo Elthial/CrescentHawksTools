@@ -9,6 +9,9 @@ trim_trailing_whitespace = true
 [*.cs]
 indent_style = space
 indent_size = 4
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_new_line_before_open_brace = all
+dotnet_sort_system_directives_first = true
 
 [*.{ps1,sln}]
 end_of_line = crlf

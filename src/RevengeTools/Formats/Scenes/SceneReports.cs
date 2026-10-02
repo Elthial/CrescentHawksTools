@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using RevengeTools.Cli;
+using CrescentHawksTools.Cli;
 using RevengeTools.Formats.Maps;
 using RevengeTools.Installation;
 

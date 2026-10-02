@@ -9,13 +9,17 @@ permissions:
 
 jobs:
   verify:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-      - run: dotnet restore CrescentHawksTools.sln
+          dotnet-version: 10.0.x
+      - run: dotnet restore CrescentHawksTools.sln --configfile NuGet.Config
       - run: dotnet build CrescentHawksTools.sln --configuration Release --no-restore
       - run: dotnet run --project tests/InceptionTools.Verification --configuration Release --no-build
       - run: dotnet run --project tests/RevengeTools.Verification --configuration Release --no-build

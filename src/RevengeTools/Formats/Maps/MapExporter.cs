@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using RevengeTools.Cli;
+using CrescentHawksTools.Cli;
 using RevengeTools.Formats.Graphics;
 using RevengeTools.Formats.Palettes;
 using RevengeTools.Installation;

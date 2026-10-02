@@ -340,6 +340,7 @@ ASALocalRun/
 # Toolkit-generated output
 /InceptionTools.Output/
 /RevengeTools.Output/
+/ExtractedAssets/
 /images/
 /maps/
 /animation-gifs/

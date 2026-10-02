@@ -22,6 +22,7 @@ public sealed class InstallationInventoryReport
     public required string InstallationPath { get; init; }
     public required string LocatedBy { get; init; }
     public required bool HashesIncluded { get; init; }
+    public required string DetectedVersion { get; init; }
     public required IReadOnlyList<InstallationInventoryEntry> Files { get; init; }
     public bool IsValid => Files.All(file => !file.Required || file.Present) &&
         Files.Where(file => file.Present).All(file => file.Validation.StartsWith("ok", StringComparison.Ordinal));
@@ -55,6 +56,7 @@ public static class InstallationInventory
             InstallationPath = installation.DirectoryPath,
             LocatedBy = installation.Source,
             HashesIncluded = includeHashes,
+            DetectedVersion = KnownGameVersions.Identify(installation.ResolveFile("REVENGE.EXE")),
             Files = entries
         };
     }
@@ -71,6 +73,7 @@ public static class InstallationInventory
     private static InstallationInventoryEntry Inspect(string name, string category, bool required,
         string path, bool includeHashes)
     {
+        GameInstallation.EnsureInputSize(path);
         byte[] data = File.ReadAllBytes(path);
         return new InstallationInventoryEntry
         {

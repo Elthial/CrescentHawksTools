@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
-using RevengeTools.Cli;
+using CrescentHawksTools.Cli;
 using RevengeTools.Formats.Units;
 using RevengeTools.Installation;
 
@@ -107,12 +107,12 @@ public static class WeaponReports
     {
         var counts = new Dictionary<(int Group, byte Code), int>();
         foreach (UnitRecord unit in units)
-        foreach (UnitEquipmentLocation location in unit.EquipmentLocations)
-        foreach (byte rawCode in location.Slots)
-        {
-            byte code = (byte)(rawCode & 0x7F);
-            if (code != 0) counts[(location.Index, code)] = counts.GetValueOrDefault((location.Index, code)) + 1;
-        }
+            foreach (UnitEquipmentLocation location in unit.EquipmentLocations)
+                foreach (byte rawCode in location.Slots)
+                {
+                    byte code = (byte)(rawCode & 0x7F);
+                    if (code != 0) counts[(location.Index, code)] = counts.GetValueOrDefault((location.Index, code)) + 1;
+                }
 
         var output = new StringBuilder("raw_location_group,battlemech_interpretation,raw_equipment_id,known_weapon,template_occurrences\n");
         foreach (var entry in counts.OrderBy(entry => entry.Key.Group).ThenBy(entry => entry.Key.Code))
@@ -130,23 +130,23 @@ public static class WeaponReports
     {
         var output = new StringBuilder("unit_id,unit_name,unit_kind,raw_location_group,location_name,slot_index,raw_value,damaged,base_equipment_id,known_weapon\n");
         foreach (UnitRecord unit in units)
-        foreach (UnitEquipmentLocation location in unit.EquipmentLocations)
-        for (int slotIndex = 0; slotIndex < location.Slots.Length; slotIndex++)
-        {
-            byte raw = location.Slots[slotIndex];
-            byte equipmentId = (byte)(raw & 0x7F);
-            if (equipmentId == 0) continue;
-            WeaponDefinition? weapon = equipmentId <= WeaponCatalog.Count
-                ? catalog.Weapons[equipmentId - 1] : null;
-            string locationName = unit.UnitKind == UnitKind.BattleMech
-                ? location.BattleMechLocation : $"raw-group-{location.Index}";
-            output.Append("0x").Append(unit.UnitTypeId.ToString("X2")).Append(',')
-                .Append(unit.UnitName).Append(',').Append(unit.UnitKind).Append(',')
-                .Append(location.Index).Append(',').Append(locationName).Append(',')
-                .Append(slotIndex).Append(",0x").Append(raw.ToString("X2")).Append(',')
-                .Append((raw & 0x80) != 0 ? "true" : "false").Append(",0x")
-                .Append(equipmentId.ToString("X2")).Append(',').AppendLine(weapon?.Name ?? string.Empty);
-        }
+            foreach (UnitEquipmentLocation location in unit.EquipmentLocations)
+                for (int slotIndex = 0; slotIndex < location.Slots.Length; slotIndex++)
+                {
+                    byte raw = location.Slots[slotIndex];
+                    byte equipmentId = (byte)(raw & 0x7F);
+                    if (equipmentId == 0) continue;
+                    WeaponDefinition? weapon = equipmentId <= WeaponCatalog.Count
+                        ? catalog.Weapons[equipmentId - 1] : null;
+                    string locationName = unit.UnitKind == UnitKind.BattleMech
+                        ? location.BattleMechLocation : $"raw-group-{location.Index}";
+                    output.Append("0x").Append(unit.UnitTypeId.ToString("X2")).Append(',')
+                        .Append(unit.UnitName).Append(',').Append(unit.UnitKind).Append(',')
+                        .Append(location.Index).Append(',').Append(locationName).Append(',')
+                        .Append(slotIndex).Append(",0x").Append(raw.ToString("X2")).Append(',')
+                        .Append((raw & 0x80) != 0 ? "true" : "false").Append(",0x")
+                        .Append(equipmentId.ToString("X2")).Append(',').AppendLine(weapon?.Name ?? string.Empty);
+                }
         return output.ToString();
     }
 

@@ -3,16 +3,17 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
+using CrescentHawksTools.Cli;
 using InceptionTools;
 using InceptionTools.Animation;
-using InceptionTools.Binary;
-using InceptionTools.Installation;
-using InceptionTools.Inspection;
-using InceptionTools.Records;
-using InceptionTools.Graphics;
-using InceptionTools.SaveEditing;
 using InceptionTools.Audio;
+using InceptionTools.Binary;
+using InceptionTools.Graphics;
+using InceptionTools.Inspection;
+using InceptionTools.Installation;
 using InceptionTools.Maps;
+using InceptionTools.Records;
+using InceptionTools.SaveEditing;
 
 internal static class Program
 {
@@ -24,6 +25,7 @@ internal static class Program
         Directory.CreateDirectory(fixture);
         try
         {
+            VerifyCommandLineContract();
             byte[] binaryFixture = new byte[] { 0x34, 0x12, 0x78, 0x56, 0x34, 0x12, (byte)'A', 0x00, 0x20 };
             var binaryReader = new BoundedBinaryReader(binaryFixture, "synthetic reader fixture");
             Assert(binaryReader.ReadByte(0) == 0x34, "bounded byte read");
@@ -71,6 +73,9 @@ internal static class Program
             mapFixture[MtpMapRecord.StandardHeaderLength] = 0;
             File.WriteAllBytes(Path.Combine(fixture, "MAP1.MTP"), mapFixture);
             File.WriteAllBytes(Path.Combine(fixture, "EXTRA.DAT"), new byte[] { 1, 2, 3 });
+            string oversizedPath = Path.Combine(fixture, "OVERSIZED.DAT");
+            using (FileStream oversized = File.Create(oversizedPath))
+                oversized.SetLength(GameInstallation.MaximumInputFileLength + 1);
             byte[] animation = new byte[0x80];
             animation[0] = 0x41;
             animation[1] = 0x42;
@@ -105,6 +110,9 @@ internal static class Program
             File.WriteAllBytes(Path.Combine(fixture, "GAME1"), save);
 
             GameInstallation located = GameInstallationLocator.Locate(fixture);
+            AssertThrows<InvalidDataException>(() => located.ResolveFile("OVERSIZED.DAT"),
+                "installation input-size limit rejects oversized files before allocation");
+            File.Delete(oversizedPath);
             Assert(located.Source == "--game-dir", "explicit path provenance");
             Assert(located.DirectoryPath == Path.GetFullPath(fixture), "explicit path normalization");
 
@@ -242,7 +250,7 @@ internal static class Program
             report = InstallationInventory.Scan(located, true);
             bld = Find(report, "TRAINING.BLD");
             Assert(bld.Validation.StartsWith("invalid-bld:", StringComparison.Ordinal), "bad BLD length rejected");
-            Assert(Find(report, "BTECH.EXE").Sha256.Length == 64, "optional SHA-256");
+            Assert(Find(report, "BTECH.EXE").Sha256?.Length == 64, "optional SHA-256");
 
             File.WriteAllBytes(Path.Combine(fixture, "TRAINING.BLD"), new byte[] { 3, 0, 0xEE, 0xC6, 0xEB });
             FileInspectionResult decoded = FileInspector.Inspect(located, "training.bld", 0, 3, true);
@@ -420,7 +428,7 @@ internal static class Program
                 MechRecord.Parse(deactivatedEnemy.Bytes.Skip(emptyEnemyOffset).Take(MechRecord.Length).ToArray()).Name == "STINGER",
                 "deactivating mech writes 0xFF over first name character");
 
-            WeaponTableDump weaponDump = WeaponTableInspector.InspectCapturedTable();
+            WeaponTableDump weaponDump = WeaponTableInspector.InspectReferenceTable();
             Assert(weaponDump.Weapons.Count == 33 && weaponDump.RecordLength == 0x11, "weapon table shape");
             Assert(weaponDump.Weapons[0].Name == "Cudgel" && weaponDump.Weapons[3].Name == "VibroBlade", "eleven-byte weapon names");
             Assert(weaponDump.Weapons[9].UsesPersonnelDamageEncoding && weaponDump.Weapons[9].SelectorValue == 4, "personnel repeated attacks");
@@ -431,7 +439,7 @@ internal static class Program
             Assert(weaponDump.Weapons[25].MissileClusterColumn == 4, "missile cluster selector");
             Assert(WeaponTableInspector.WriteJson(weaponDump).Contains("\"UnknownHeatEffectHighNibble\": 3", StringComparison.Ordinal),
                 "weapon JSON preserves unknown high nibble");
-            WeaponRecord smallLaser = WeaponRecord.Parse(new GameData().WeaponData[15], 15);
+            WeaponRecord smallLaser = WeaponRecord.Parse(WeaponReferenceCatalog.Definitions[15].EncodeRecord(), 15);
             Assert(smallLaser.Name == "SmallLaser" && smallLaser.MechComponentId == 0x10 &&
                 smallLaser.EffectiveMediumRangeThreshold == 9, "canonical weapon record");
 
@@ -655,12 +663,44 @@ internal static class Program
             Assert(SoundEffectCatalog.All.All(effect => SoundEffectRenderer.RenderWave(effect, 8000).Length > 44),
                 "all executable sound effects render to WAV");
 
+            VerifyMalformedInputSweep();
+
             Console.WriteLine("InceptionTools verification passed: " + _assertions + " assertions.");
             return 0;
         }
         finally
         {
             Directory.Delete(fixture, true);
+        }
+    }
+
+    private static void VerifyCommandLineContract()
+    {
+        CommandLine parsed = CommandLine.Parse(["--json", "--output=result.json", "input.bin"], "output");
+        Assert(parsed.Has("json") && parsed.Get("output") == "result.json" &&
+            parsed.Positionals.SequenceEqual(["input.bin"]), "shared CLI flag/value/positional parsing");
+        CommandLine terminated = CommandLine.Parse(["--", "--literal"]);
+        Assert(terminated.Positionals.SequenceEqual(["--literal"]), "shared CLI option terminator");
+        AssertThrows<ArgumentException>(() => CommandLine.Parse(["--output"], "output"),
+            "shared CLI rejects missing option value");
+        AssertThrows<ArgumentException>(() => CommandLine.Parse(["--json", "--json"]),
+            "shared CLI rejects duplicate option");
+    }
+
+    private static void VerifyMalformedInputSweep()
+    {
+        for (int length = 0; length < WeaponRecord.Length; length++)
+        {
+            byte[] truncated = new byte[length];
+            AssertThrows<InvalidDataException>(() => WeaponRecord.Parse(truncated, 0),
+                $"weapon parser rejects truncation length {length}");
+        }
+
+        for (int length = 0; length < AnmFileRecord.HeaderLength; length += 7)
+        {
+            byte[] truncated = new byte[length];
+            AssertThrows<InvalidDataException>(() => AnmFileRecord.Parse(truncated),
+                $"ANM parser rejects truncation length {length}");
         }
     }
 

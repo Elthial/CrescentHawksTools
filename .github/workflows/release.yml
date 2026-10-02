@@ -1,0 +1,38 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - shell: pwsh
+        run: |
+          dotnet restore CrescentHawksTools.sln --configfile NuGet.Config
+          foreach ($tool in 'InceptionTools','RevengeTools') {
+            $out = "artifacts/$tool-net10-portable"
+            dotnet publish "src/$tool/$tool.csproj" -c Release --no-restore -p:UseAppHost=false -o $out
+            Compress-Archive -Path "$out/*" -DestinationPath "artifacts/$tool-net10-portable.zip"
+          }
+          Get-ChildItem artifacts/*.zip | Get-FileHash -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLowerInvariant())  $($_.Path | Split-Path -Leaf)" } |
+            Set-Content artifacts/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CrescentHawksTools-${{ github.ref_name }}
+          path: |
+            artifacts/*.zip
+            artifacts/SHA256SUMS.txt
+      - shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" artifacts/*.zip artifacts/SHA256SUMS.txt --generate-notes

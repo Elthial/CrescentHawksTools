@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using RevengeTools.Cli;
+using CrescentHawksTools.Cli;
 using RevengeTools.Installation;
 
 namespace RevengeTools.Formats.Audio;
