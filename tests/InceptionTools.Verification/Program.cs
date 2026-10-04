@@ -696,6 +696,13 @@ internal static class Program
 
             Assert(SoundEffectCatalog.All.Count == 18 && SoundEffectCatalog.Get("0x0A").Name == "cache-door" &&
                 SoundEffectCatalog.Get("password-accepted").Id == 0x10, "sound-effect catalog IDs and names");
+            Assert(SoundEffectCatalog.Get("mech-energy-weapon").Id == 0x02 &&
+                SoundEffectCatalog.Get("personnel-laser").Id == 0x09,
+                "confirmed mech and personnel laser sound names");
+            AssertThrows<ArgumentOutOfRangeException>(() => SoundEffectCatalog.Get("mech-kick"),
+                "incorrect mech-kick sound name is rejected");
+            AssertThrows<ArgumentOutOfRangeException>(() => SoundEffectCatalog.Get("laser"),
+                "ambiguous laser sound name is rejected");
             Assert(SoundEffectCatalog.ToExecutableWords().Length == 313 &&
                 SoundEffectCatalog.ToExecutableWords().Take(10).SequenceEqual(new ushort[]
                     { 1002, 1, 1000, 500, 100, 1, 10, 1, 0, 0 }), "sound-effect table transcription");

@@ -1,5 +1,9 @@
 # Inception weapon and range reference
 
+For presentation rather than damage statistics, see
+[combat graphics and sound dispatch](INCEPTION_COMBAT_EFFECTS.md): mech laser/PPC
+beam colours, shared AC audio, SRM/LRM flight frames, and flamer behaviour.
+
 The executable table contains 33 records of `0x11` bytes. Each record stores an
 eleven-byte name followed by damage, attack/cluster selector, heat/effect,
 packed range thresholds, maximum range and skill ID. The table below reports

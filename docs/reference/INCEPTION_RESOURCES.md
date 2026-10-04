@@ -1,5 +1,8 @@
 # Inception maps, animations and sprites
 
+The [combat effects reference](INCEPTION_COMBAT_EFFECTS.md) maps weapons to
+graphics and sound, including the actual missile loops and common hit flashes.
+
 This page separates verified format facts from descriptive identifications.
 `V` means verified by parser/runtime evidence, `P` probable, and `H` a useful
 historical identification still awaiting stronger proof.
@@ -65,6 +68,7 @@ the subset with preserved game-logic names:
 | ID | Name |
 | ---: | --- |
 | `0x68` | Missile animation base |
+| `0x82–0x91` | Actual missile flight frames; direction-specific loops, not debris |
 | `0x78` | Locust combat right 01 |
 | `0x79` | Locust combat right 02 |
 | `0x7A` | Locust combat left 01 |
@@ -80,7 +84,16 @@ the subset with preserved game-logic names:
 | `0xA4` | Commando combat right |
 | `0xA5` | Commando combat left |
 | `0xFA` | Projectile-impact animation base |
+| `0x176/0x177` | Actual common combat hit flashes; not fallen infantry |
 
 IDs not listed here are not unknown bytes: they are still available in the
 generated sequence metadata, but do not yet have equally strong individual
 semantic names. This avoids promoting guessed labels into format guarantees.
+
+Two existing export-group names are historical misidentifications:
+`effects.debris` contains the verified missile frames `0x82–0x91`, and
+`infantry.fallen` contains the common hit flashes `0x176/0x177`. The exporter
+names remain unchanged; use source sprite IDs and the verified playback loops
+in the combat-effects page. Likewise, base `0xFA` plus stream frames
+`0x7C,0x7D,0x7C` produces `0x176,0x177,0x176`; it does not draw the raw
+fire sprites `0x7C/0x7D` at that call site.

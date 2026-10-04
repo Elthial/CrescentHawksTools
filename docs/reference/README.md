@@ -8,6 +8,7 @@ can be checked against an extracted file or the reconstructed source.
 
 - [BattleMechs and stock records](INCEPTION_MECHS.md)
 - [Weapons, damage and ranges](INCEPTION_WEAPONS.md)
+- [Combat graphics, beam colours, missile sprites and sound dispatch](INCEPTION_COMBAT_EFFECTS.md)
 - [Characters, infantry armour and skills](INCEPTION_CHARACTERS.md)
 - [Roaming encounters and spawn probabilities](INCEPTION_ENCOUNTERS.md)
 - [Save-game structure](INCEPTION_SAVE_FORMAT.md)

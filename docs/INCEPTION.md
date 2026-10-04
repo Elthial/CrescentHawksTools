@@ -3,6 +3,9 @@
 For decoded game-data tables, see the
 [Inception reference section](reference/README.md#the-crescent-hawks-inception).
 
+For original weapon presentation, see
+[combat effects, colours, sprites and sound dispatch](reference/INCEPTION_COMBAT_EFFECTS.md).
+
 InceptionTools is a command-line toolkit for inspecting, extracting, converting,
 and safely modifying data from a user-supplied installation of the 1988 DOS
 game *BattleTech: The Crescent Hawk's Inception*.
@@ -329,8 +332,14 @@ dotnet run --project src/InceptionTools -- export-images --game-dir Chinception 
 
 Export all 376 MECHSHAP source sprites into one transparent, labelled sequence
 sheet plus JSON metadata. Rows cover Locust and Commando-style walking, firing,
-and kicking sequences followed by effects, debris, wreckage, infantry, Jason,
+and kicking sequences followed by effects, missile frames, wreckage, infantry, Jason,
 teammates, enemies, and civilian NPC graphics.
+
+Two legacy metadata group labels are misleading: `effects.debris` holds missile
+flight sprites `0x82–0x91`, while `infantry.fallen` holds common combat hit
+flashes `0x176/0x177`. Their source IDs are correct. Use the
+[original direction-specific loops](reference/INCEPTION_COMBAT_EFFECTS.md#srm-and-lrm-flight-sprites)
+instead of treating either metadata group as a single sequential animation.
 
 ```text
 export-mech-spritesheet [--game-dir PATH] [--output FILE.png] [--metadata FILE.json] [--force]
@@ -518,19 +527,33 @@ list-sound-effects [--json]
 dotnet run --project src/InceptionTools -- list-sound-effects
 ```
 
-The current probable semantic names are:
+The current CLI names are listed below. The confirmed combat call sites name
+**`0x02` (`mech-energy-weapon`) for mech lasers/PPCs** and
+**`0x09` (`personnel-laser`) for personnel lasers**. ACs and machine guns
+share `0x03`; SRMs and LRMs share `0x01`. `0x04` is a common hit sound for
+mech targets as well as infantry. Flamers select no firing sound in the original
+combat effects routine. See the [verified mapping](reference/INCEPTION_COMBAT_EFFECTS.md).
 
 | ID | Name | ID | Name |
 |---:|---|---:|---|
 | `0x01` | `missile` | `0x0A` | `cache-door` |
-| `0x02` | `mech-kick` | `0x0B` | `bow-string` |
+| `0x02` | `mech-energy-weapon` | `0x0B` | `bow-string` |
 | `0x03` | `repeating-projectile` | `0x0C` | `mech-startup` |
 | `0x04` | `infantry-impact` | `0x0D` | `blade-impact` |
 | `0x05` | `vibroblade` | `0x0E` | `mech-startup-failed` |
 | `0x06` | `single-shot-projectile` | `0x0F` | `map-interaction` |
 | `0x07` | `arena-destruction` | `0x10` | `password-accepted` |
 | `0x08` | `terrain-damage` | `0x11` | `password-incorrect` |
-| `0x09` | `laser` | `0x12` | `squished-by-mech` |
+| `0x09` | `personnel-laser` | `0x12` | `squished-by-mech` |
+
+The incorrect names `mech-kick` and `laser` are no longer accepted; there are
+no compatibility aliases. Numeric IDs and sound-table bytes are unchanged.
+For example:
+
+```powershell
+dotnet run --project src/InceptionTools -- export-sound-effect-wav mech-energy-weapon --output artifacts/mech-laser-ppc.wav
+dotnet run --project src/InceptionTools -- export-sound-effect-wav 0x03 --output artifacts/autocannon.wav
+```
 
 ### `export-sound-effect-wav`
 
@@ -541,7 +564,7 @@ export-sound-effect-wav ID|NAME [--output FILE.wav] [--force]
 ```
 
 ```powershell
-dotnet run --project src/InceptionTools -- export-sound-effect-wav laser --output artifacts/laser.wav
+dotnet run --project src/InceptionTools -- export-sound-effect-wav personnel-laser --output artifacts/personnel-laser.wav
 dotnet run --project src/InceptionTools -- export-sound-effect-wav 0x10
 ```
 

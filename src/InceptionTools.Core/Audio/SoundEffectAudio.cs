@@ -34,7 +34,7 @@ public static class SoundEffectCatalog
     {
         Effect(0x01, "missile", "Missile launch or flight", "Probable", 0,
             C(1002, 1, 1000, 500, 100, 1, 10)),
-        Effect(0x02, "mech-kick", "Mech kick", "Probable", 10,
+        Effect(0x02, "mech-energy-weapon", "BattleMech laser or PPC", "Confirmed", 10,
             C(1002, 1, 6000, 7000, 10, 1, 10)),
         Effect(0x03, "repeating-projectile", "Repeating projectile weapon", "Probable", 20,
             C(1002, 5, 10, 800, 20, 3, 50)),
@@ -48,7 +48,7 @@ public static class SoundEffectCatalog
             C(1004, 1, 50, 1000, 5, 5, 40), C(1004, 1, 10, 2000, 10, 5, 50)),
         Effect(0x08, "terrain-damage", "Terrain damage", "Probable", 88,
             C(1004, 1, 500, 1000, 2, 2, 10), C(1004, 1, 500, 1500, 2, 2, 20), C(1004, 1, 500, 2000, 2, 2, 40)),
-        Effect(0x09, "laser", "Laser weapon", "Probable", 112,
+        Effect(0x09, "personnel-laser", "Personnel laser", "Confirmed", 112,
             C(1003, 4, 500, 400, 300, 1, 1)),
         Effect(0x0A, "cache-door", "Star League cache grinding door", "Probable", 122,
             C(1002, 20, 100, 50, 1, 100, 40)),
